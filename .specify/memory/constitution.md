@@ -1,113 +1,106 @@
-# Podcast Manager Constitution
+# ポッドキャスト マネージャー 憲法
 
-## Core Principles
+## 基本原則
 
-### I. Code Quality
+### I. コード品質
 
-Clean, maintainable code is foundational to all development:
+クリーンで保守性の高いコードは、すべての開発の基盤です：
 
-- **Consistency**: Follow established conventions; use linters/formatters (ESLint, Prettier) to enforce style
-- **Documentation**: Public APIs must have JSDoc/TypeDoc comments; complex logic requires explanatory comments
-- **Modularity**: Functions/classes have single, clear responsibilities; favor composition over inheritance
-- **Type Safety**: TypeScript strict mode enabled; no implicit any; types are part of the contract
-- **Code Review**: All code reviewed before merge; reviewers verify quality, readability, and adherence to principles
+- **一貫性**: 確立された慣例に従う; リンター/フォーマッター（ESLint、Prettier）を使用してスタイルを強制する
+- **ドキュメンテーション**: 公開 API は JSDoc/TypeDoc コメントが必須; 複雑なロジックには説明コメントが必須
+- **モジュール性**: 関数/クラスは単一の明確な責務を持つ; 継承よりもコンポジションを優先
+- **型安全性**: TypeScript 厳密モード有効; 暗黙の any なし; 型は契約の一部
+- **コードレビュー**: マージ前にすべてのコードをレビュー; レビュアーが品質、可読性、原則への準拠を確認
 
-### II. Testing Standards (NON-NEGOTIABLE)
+### II. テスト基準（必須）
 
-Test-driven development is mandatory at all levels:
+テスト駆動開発はすべてのレベルで必須です：
 
-- **Unit Tests**: Minimum 80% code coverage; each unit tested in isolation
-- **Integration Tests**: Critical paths tested end-to-end; new library contracts require contract tests
-- **Test Naming**: Clear, descriptive names (`should_returnError_whenInputIsInvalid`) indicate expected behavior
-- **Test Data**: Use fixtures and factories; avoid hard-coded magic values; tests independent and repeatable
-- **Performance Tests**: API response times and data processing benchmarked; regressions caught early
-- **Test Workflow**: Red-Green-Refactor cycle: tests written first, validated to fail, then implementation, then refactor
+- **ユニットテスト**: 最低 80%のコード対象; 各ユニットを独立してテスト
+- **統合テスト**: 重要なパスをエンドツーエンドでテスト; 新しいライブラリの契約はコントラクトテストが必須
+- **テスト命名**: 明確で説明的な名前（`should_returnError_whenInputIsInvalid`）で期待動作を表示
+- **テストデータ**: フィクスチャとファクトリを使用; ハードコードされたマジック値を回避; テストは独立し再現可能
+- **パフォーマンステスト**: API レスポンス時間とデータ処理をベンチマーク; 回帰を早期に検出
+- **テストワークフロー**: Red-Green-Refactor サイクル: テストを最初に書く、失敗することを確認、実装、その後リファクタリング
 
-### III. User Experience Consistency
+### III. ユーザー体験の一貫性
 
-Seamless, predictable user interactions across all touchpoints:
+すべてのタッチポイントにおけるシームレスで予測可能なユーザーインタラクション：
 
-- **Interface Design**: UI patterns consistent across features; design system documented and enforced
-- **Error Handling**: User-friendly error messages; technical details in logs, human guidance in UI
-- **Loading States**: Spinners/progress indicators for all async operations; prevent user confusion
-- **Accessibility**: WCAG 2.1 AA compliance; keyboard navigation, screen reader support, contrast ratios
-- **Performance Perception**: Visual feedback immediate (< 100ms); full loads under 2 seconds
-- **Feedback Loops**: User actions confirmed; results clearly communicated; status always visible
+- **インターフェースデザイン**: UI パターンは機能全体で一貫; デザインシステムはドキュメント化され強制される
+- **エラーハンドリング**: ユーザーフレンドリーなエラーメッセージ; 技術的な詳細はログに、人間向けガイダンスは UI に
+- **ローディング状態**: すべての非同期操作にスピナー/進捗インジケーター; ユーザーの混乱を防止
+- **アクセシビリティ**: WCAG 2.1 AA コンプライアンス; キーボードナビゲーション、スクリーンリーダーサポート、コントラスト比
+- **パフォーマンス認識**: ビジュアルフィードバックは即座（< 100ms）; 完全な読み込みは 2 秒以下
+- **フィードバックループ**: ユーザーアクションを確認; 結果を明確に伝達; ステータスは常に表示
 
-### IV. Performance Requirements
+### IV. パフォーマンス要件
 
-Fast, efficient systems that scale:
+スケーラブルで高速で効率的なシステム：
 
-- **Response Times**: API endpoints respond in < 500ms (p95); UI interactions respond in < 100ms
-- **Data Processing**: Bulk operations stream data; avoid loading entire datasets into memory
-- **Database Queries**: Indexed appropriately; N+1 queries eliminated; query performance monitored
-- **Caching Strategy**: HTTP caching headers set correctly; client-side caching for static assets; invalidation clear
-- **Bundle Size**: JavaScript bundles < 250KB (gzipped); lazy-load non-critical code; monitor with tools
-- **Resource Usage**: Memory leaks prevented; connection pooling configured; monitoring/alerts active
+- **レスポンス時間**: API エンドポイントは < 500ms（p95）で応答; UI インタラクションは < 100ms で応答
+- **データ処理**: バルク操作はデータをストリーミング; データセット全体をメモリに読み込まない
+- **データベースクエリ**: 適切にインデックス; N+1 クエリを排除; クエリパフォーマンスを監視
+- **キャッシュ戦略**: HTTP キャッシュヘッダーを正しく設定; 静的アセットのクライアント側キャッシング; 無効化を明確化
+- **バンドルサイズ**: JavaScript バンドル < 250KB（圧縮）; 非関键コードは遅延読み込み; ツールで監視
+- **リソース使用**: メモリリークを防止; コネクションプーリングを構成; 監視/アラートを有効化
 
-## Quality Assurance & Implementation
+## 品質保証と実装
 
-### Code Review Process
+### コードレビュープロセス
 
-- All PRs require at least one approval before merge
-- Reviewers verify adherence to code quality, testing, and performance standards
-- Tests must pass and coverage maintained
-- Performance impact of changes assessed
+- レビュアーはコード品質、テスト、パフォーマンス基準への準拠を検証
+- テストは成功し、対象は維持される必要がある
+- 変更のパフォーマンスへの影響を評価
 
-### Testing Gates
+### テストゲート
 
-- No merge without test coverage above 80%
-- All tests must pass on main branch (CI/CD blocking)
-- Performance regressions detected and flagged
-- Integration tests run for any feature touching multiple systems
+- テスト対象 80%以上なしではマージなし
+- すべてのテストはメインブランチを通過する必要がある（CI/CD ブロッキング）
+- パフォーマンス回帰を検出し、フラグを立てる
+- 複数のシステムに触れるすべての機能に対して統合テストを実行
 
-### Performance Monitoring
+### パフォーマンス監視
 
-- Application Performance Monitoring (APM) active in staging and production
-- Alerts trigger on: API latency > 1s, bundle size increase > 10KB, memory leaks, error rate > 1%
-- Weekly performance reports reviewed
-- Performance budget maintained and tracked
+- アプリケーション パフォーマンス監視（APM）はステージングと本番で有効
+- パフォーマンス予算を維持し追跡
 
-## Development Standards & Guidelines
+## 開発基準とガイドライン
 
-### Code Quality Tools
+### コード品質ツール
 
-- **Linting**: ESLint with strict configuration; pre-commit hooks enforce checks
-- **Formatting**: Prettier for consistent code style; automated on save
-- **Type Checking**: TypeScript strict mode; no escape hatches without justification
-- **Static Analysis**: SonarQube or similar to detect code smells, vulnerabilities, duplicates
+- **リント**: ESLint 厳密構成; pre-commit フックチェックを強制
+- **フォーマット**: コード一貫性を保つための Prettier; 保存時に自動化
+- **型チェック**: TypeScript 厳密モード; 正当な理由がない限りエスケープハッチなし
+- **静的分析**: SonarQueue または同等で、コードスメル、脆弱性、重複を検出
 
-### Testing Framework & Tools
+### テストフレームワークとツール
 
-- Unit: Jest with 80%+ coverage requirement
-- Integration: Supertest (API) + Cypress/Playwright (E2E)
-- Performance: Artillery or K6 for load testing
-- Mocking: MSW for API mocking; factories for data generation
+- ユニット: 80%以上対象要件を持つ Jest
+- 統合: Supertest（API）+ Cypress/Playwright（E2E）
+- モッキング: API モッキング用 MSW; データ生成用ファクトリ
 
-### UX Standards
+### UX 基準
 
-- Accessibility: Axe DevTools, Lighthouse audits (target score: 95+)
-- Design System: Component library documented; Storybook for visual testing
-- Internationalization: i18n framework configured; message catalogs reviewed
-- Analytics: User interaction tracking implemented; privacy compliant
+- 多言語化: i18n フレームワークを構成; メッセージカタログを確認
 
-### Performance Budgets
+### パフォーマンス予算
 
-- JavaScript: 250KB gzipped
-- CSS: 50KB gzipped
-- Images: 2MB total per page (optimized)
-- API Endpoints: p95 latency < 500ms
+- JavaScript: 250KB 圧縮
+- CSS: 50KB 圧縮
+- 画像: ページあたり 2MB 合計（最適化）
+- API エンドポイント: p95 レイテンシ < 500ms
 
-## Governance
+## ガバナンス
 
-**Constitution Authority**: This constitution is the source of truth for all development practices. All PRs and reviews must verify compliance with these principles.
+**憲法権限**: この憲法はすべての開発慣行の信頼できる情報源です。すべての PR とレビューはこれらの原則への準拠を確認する必要があります。
 
-**Amendment Process**:
+**改正プロセス**:
 
-- Changes require documentation and team approval
-- Migration plan provided for existing code
-- Version number incremented and date recorded
+- 変更にはドキュメンテーションとチーム承認が必要
+- 既存コードの移行計画を提供
+- バージョン番号を増分し日付を記録
 
-**Violations**: Deviations flagged in code review; patterns escalated to team leads.
+**違反**: コードレビューでフラグを立てた逸脱; チームリーダーにエスカレートされたパターン。
 
-**Version**: 1.0.0 | **Ratified**: 2026-01-03 | **Last Amended**: 2026-01-03
+**バージョン**: 1.0.0 | **批准日**: 2026-01-03 | **最終改正日**: 2026-01-03
