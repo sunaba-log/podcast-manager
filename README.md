@@ -82,6 +82,23 @@ specs/001-podcast-cms-core/spec.md Podcastの新エピソード追加では、�
 specs/001-podcast-cms-core/spec.md GCSにアップロードした後にCloud Runで実行される処理は別のリポジトリで管理されているので、本アプリで実装する必要はない。以上の仕様をspec.mdに記載する必要があれば追記して。
 ```
 
+### 修正 3：spec.mdの変更をもとにplanの再実行
+
+```sh
+$ /speckit.plan specs/001-podcast-cms-core/spec.md の変更をもとに、planを修正する必要があれば修正して。
+
+の変更内容を確認して、plan.md で修正が必要な箇所を特定します。主な変更点は：
+
+GCS へのアップロードまでが本アプリの責務
+GCS → R2 へのコピー処理は別リポジトリの Cloud Run ワーカーで実行される
+R2 ファイルの削除もワーカー側で処理される
+plan.md で修正が必要な箇所：
+
+ストレージサービスの説明
+バックエンド ワーカーの説明
+Phase 1 のタスク説明
+```
+
 ## 5. Break down into tasks
 
 Use /speckit.tasks to create an actionable task list from your implementation plan.

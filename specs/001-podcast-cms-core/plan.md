@@ -7,7 +7,7 @@
 
 ## 概要
 
-ポッドキャスト配信者向けの特化型CMS。番組メタデータ、エピソード管理、音声ファイルアップロード、RSS フィード自動生成を実装。アーキテクチャは Next.js フロントエンドダッシュボードと Google Cloud Run 上のバックエンドワーカーで構成。データベースは PostgreSQL + Prisma ORM を使用し、音声ファイルは Google Cloud Storage (GCS) に直接アップロード、RSS フィードは Cloudflare R2 の公開 URL を使用して生成される。
+ポッドキャスト配信者向けの特化型CMS。番組メタデータ、エピソード管理、音声ファイルアップロード、RSS フィード自動生成を実装。アーキテクチャは Next.js フロントエンドダッシュボードで構成。データベースは PostgreSQL + Prisma ORM を使用。本アプリは署名付きURL経由で Google Cloud Storage (GCS) へのアップロードまでを責務とし、GCS から Cloudflare R2 へのコピーと R2 ファイル管理は別リポジトリで管理される Google Cloud Run ワーカーで実行される。RSS フィードは R2 の公開 URL を使用して生成される。
 
 ## 技術コンテキスト
 
@@ -146,13 +146,11 @@ specs/001-podcast-cms-core/
 │   │   │   ├── podcast.ts
 │   │   │   ├── episode.ts
 │   │   │   └── user.ts
-│   │   ├── workers/                 # Google Cloud Run ワーカー
-│   │   │   ├── feed-generator.ts    # 定期 RSS 生成ワーカー
-│   │   │   └── cleanup.ts           # 古いファイルクリーンアップ
+│   │   ├── events/                  # イベント定義
+│   │   │   └── episode-deleted.ts   # エピソード削除イベント
 │   │   ├── lib/
 │   │   │   ├── db.ts               # Prisma クライアント
-│   │   │   ├── gcs.ts              # Google Cloud Storage
-│   │   │   ├── r2.ts               # Cloudflare R2
+│   │   │   ├── gcs.ts              # Google Cloud Storage (署名付きURL生成、削除イベント)
 │   │   │   └── validators.ts       # Zod スキーマ
 │   │   └── types/
 │   ├── tests/
@@ -203,13 +201,14 @@ specs/001-podcast-cms-core/
 
 **研究タスク**:
 
-1. Google Cloud Storage との署名付きURL統合パターン
-2. Cloudflare R2 API と RSS フィード配信戦略
-3. Prisma による複雑な関連付けと権限管理
-4. Next.js App Router での認証フローベストプラクティス
-5. Shadcn UI カスタマイズとアクセシビリティ実装
-6. Jest + Playwright でのテスト戦略（API + E2E）
-7. RSS フィード生成の検証ルール（Podcast Namespace）
+1. Google Cloud Storage との署名付きURL統合パターン（アップロード、削除イベント）
+2. Google Cloud Pub/Sub を用いた GCS → R2 コピーのイベント駆動アーキテクチャ（別リポジトリ実装）
+3. イベントベース削除通知の仕様（エピソード削除時の GCS/R2 クリーンアップ）
+4. Prisma による複雑な関連付けと権限管理
+5. Next.js App Router での認証フローベストプラクティス
+6. Shadcn UI カスタマイズとアクセシビリティ実装
+7. Jest + Playwright でのテスト戦略（API + E2E）
+8. RSS フィード生成の検証ルール（Podcast Namespace）- R2 URL を Enclosure に含める
 
 **出力**: `research.md` (すべての NEEDS CLARIFICATION を解決)
 
@@ -228,11 +227,14 @@ specs/001-podcast-cms-core/
    - OpenAPI 3.0 スキーマ (`api.openapi.yaml`)
    - 認証 (JWT), 番組管理, エピソード管理, フィード生成, チーム管理エンドポイント
    - 署名付きURL生成エンドポイント (GCS アップロード用)
+   - エピソード削除イベント通知エンドポイント（GCS/R2 クリーンアップ用）
 
 3. **クイックスタート** (`quickstart.md`):
    - ローカル環境セットアップ手順
    - 初期データベース初期化スクリプト
+   - GCS 認証情報セットアップ（署名付きURL生成用）
    - 最初の番組・エピソード作成フロー
+   - 本アプリと別リポジトリ（ワーカー）との連携ポイント説明
 
 4. **エージェントコンテキスト更新**:
    - `.specify/scripts/bash/update-agent-context.sh copilot` を実行
