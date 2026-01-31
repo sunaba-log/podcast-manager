@@ -35,11 +35,9 @@ Project ready.
 │  ○ /speckit.checklist (optional) - Generate quality checklists to validate requirements completeness, clarity, and consistency (after /speckit.plan)                                              │
 │                                                                                                                                                                                                   │
 ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-
 ```
 
-
-```
+```sh
 # 提供する機能と範囲（What: 何を作るのか）
 本サービスは、**「ポッドキャスト特化型コンテンツ管理システム（CMS）」**です。
 
@@ -62,3 +60,20 @@ C. RSSフィード生成・出力機能
 - フィードURLの発行: 外部プラットフォーム（Apple, Spotify等）に登録するための固定RSS URLを提供する
 - マルチ番組対応: 1つのユーザーアカウントで「複数の異なる番組」を管理できる
 - チーム管理:「編集者」や「管理者」のように複数人でログインして共同編集できる
+```
+
+## 4. Create a technical implementation plan
+
+```sh
+/speckit.plan アプリケーションはNext.js (App Router) とTypeScriptで構築されたポッドキャストCMSです。 アーキテクチャは、フロントエンドダッシュボードと、Google Cloud Run上で動作する独立したバックエンドワーカーで構成されます。 データベースにはPostgreSQLを、ORMにはPrismaを使用してください。 中核となる音声パイプラインは以下のフローに従う必要があります：
+1. クライアントは署名付きURL経由でGoogle Cloud Storage (GCS) に直接音声をアップロードする。
+2. RSSフィードはCloudflare R2の公開URLを使用して生成される。 フロントエンドコンポーネントにはShadcn UIを使用してください。
+```
+
+## 5. Break down into tasks
+
+Use /speckit.tasks to create an actionable task list from your implementation plan.
+
+```sh
+/speckit.tasks
+```

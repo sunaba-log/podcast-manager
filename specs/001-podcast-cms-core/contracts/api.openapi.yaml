@@ -1,0 +1,902 @@
+openapi: 3.0.0
+info:
+  title: Podcast Manager API
+  description: ポッドキャスト特化型CMS RESTful API
+  version: 1.0.0
+  contact:
+    name: API Support
+    url: https://podcast-manager.example.com/support
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+
+servers:
+  - url: https://api.podcast-manager.example.com/v1
+    description: Production
+  - url: http://localhost:3000/api/v1
+    description: Development
+
+tags:
+  - name: Authentication
+    description: ユーザー認証
+  - name: Podcasts
+    description: 番組管理
+  - name: Episodes
+    description: エピソード管理
+  - name: Uploads
+    description: ファイルアップロード
+  - name: Feeds
+    description: RSSフィード
+  - name: Team
+    description: チーム管理
+
+paths:
+  # ===== Authentication =====
+  /auth/register:
+    post:
+      summary: ユーザー登録
+      operationId: registerUser
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 8
+                name:
+                  type: string
+              required: [email, password, name]
+      responses:
+        201:
+          description: ユーザー作成成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  email:
+                    type: string
+                  name:
+                    type: string
+                  token:
+                    type: string
+        400:
+          description: バリデーションエラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        409:
+          description: メールアドレスが既に登録済み
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/login:
+    post:
+      summary: ログイン
+      operationId: login
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+              required: [email, password]
+      responses:
+        200:
+          description: ログイン成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  email:
+                    type: string
+                  name:
+                    type: string
+                  token:
+                    type: string
+        401:
+          description: 認証失敗
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ===== Podcasts =====
+  /shows:
+    get:
+      summary: 番組一覧取得（所有 + チームメンバー）
+      operationId: listPodcasts
+      tags:
+        - Podcasts
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: language
+          in: query
+          schema:
+            type: string
+      responses:
+        200:
+          description: 番組一覧
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PodcastResponse'
+                  pagination:
+                    $ref: '#/components/schemas/PaginationInfo'
+        401:
+          description: 認証が必要
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      summary: 新規番組作成
+      operationId: createPodcast
+      tags:
+        - Podcasts
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  minLength: 1
+                  maxLength: 255
+                description:
+                  type: string
+                  minLength: 1
+                  maxLength: 1000
+                author:
+                  type: string
+                category:
+                  type: array
+                  items:
+                    type: string
+                    enum: [Technology, Business, News, Education, Arts]
+                language:
+                  type: string
+                  pattern: '^[a-z]{2}$'
+                explicit:
+                  type: boolean
+              required: [title, description]
+      responses:
+        201:
+          description: 番組作成成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PodcastResponse'
+        400:
+          description: バリデーションエラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        401:
+          description: 認証が必要
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /shows/{podcastId}:
+    get:
+      summary: 番組詳細取得
+      operationId: getPodcast
+      tags:
+        - Podcasts
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: podcastId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: 番組詳細
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PodcastDetailResponse'
+        401:
+          description: 認証が必要
+        403:
+          description: アクセス権なし
+        404:
+          description: 番組が見つかりません
+
+    patch:
+      summary: 番組情報更新（ADMIN のみ）
+      operationId: updatePodcast
+      tags:
+        - Podcasts
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: podcastId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                author:
+                  type: string
+                category:
+                  type: array
+                  items:
+                    type: string
+                explicit:
+                  type: boolean
+      responses:
+        200:
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PodcastResponse'
+        403:
+          description: アクセス権なし（ADMIN 権限が必須）
+
+    delete:
+      summary: 番組削除（ADMIN のみ）
+      operationId: deletePodcast
+      tags:
+        - Podcasts
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: podcastId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: 削除成功
+        403:
+          description: アクセス権なし（ADMIN 権限が必須）
+        404:
+          description: 番組が見つかりません
+
+  # ===== Episodes =====
+  /shows/{podcastId}/episodes:
+    get:
+      summary: エピソード一覧取得
+      operationId: listEpisodes
+      tags:
+        - Episodes
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: podcastId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: season
+          in: query
+          schema:
+            type: integer
+      responses:
+        200:
+          description: エピソード一覧
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EpisodeResponse'
+                  pagination:
+                    $ref: '#/components/schemas/PaginationInfo'
+
+    post:
+      summary: 新規エピソード作成（ADMIN/EDITOR）
+      operationId: createEpisode
+      tags:
+        - Episodes
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: podcastId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  minLength: 1
+                description:
+                  type: string
+                episodeNumber:
+                  type: integer
+                seasonNumber:
+                  type: integer
+                publishedAt:
+                  type: string
+                  format: date-time
+                explicit:
+                  type: boolean
+              required: [title, description, publishedAt]
+      responses:
+        201:
+          description: エピソード作成成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EpisodeResponse'
+
+  /episodes/{episodeId}:
+    patch:
+      summary: エピソード情報更新
+      operationId: updateEpisode
+      tags:
+        - Episodes
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: episodeId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                publishedAt:
+                  type: string
+                  format: date-time
+                explicit:
+                  type: boolean
+      responses:
+        200:
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EpisodeResponse'
+
+    delete:
+      summary: エピソード削除（ADMIN のみ）
+      operationId: deleteEpisode
+      tags:
+        - Episodes
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: episodeId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: 削除成功
+
+  # ===== Uploads =====
+  /shows/{podcastId}/artwork/upload-url:
+    post:
+      summary: アートワーク用署名付きURL生成
+      operationId: getArtworkUploadUrl
+      tags:
+        - Uploads
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: podcastId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fileName:
+                  type: string
+                mimeType:
+                  type: string
+                  enum: [image/jpeg, image/png, image/webp]
+              required: [fileName, mimeType]
+      responses:
+        200:
+          description: 署名付きURL生成成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  uploadUrl:
+                    type: string
+                  validationUrl:
+                    type: string
+                  expiresIn:
+                    type: integer
+                    description: 有効期限（秒）
+
+  /episodes/{episodeId}/audio/upload-url:
+    post:
+      summary: 音声ファイル用署名付きURL生成
+      operationId: getAudioUploadUrl
+      tags:
+        - Uploads
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: episodeId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fileName:
+                  type: string
+                mimeType:
+                  type: string
+                  enum: [audio/mpeg, audio/aac]
+              required: [fileName, mimeType]
+      responses:
+        200:
+          description: 署名付きURL生成成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  uploadUrl:
+                    type: string
+                  expiresIn:
+                    type: integer
+
+  /episodes/{episodeId}/audio/confirm-upload:
+    post:
+      summary: 音声アップロード完了確認
+      operationId: confirmAudioUpload
+      tags:
+        - Uploads
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: episodeId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                gcsPath:
+                  type: string
+                size:
+                  type: integer
+                mimeType:
+                  type: string
+              required: [gcsPath, size, mimeType]
+      responses:
+        200:
+          description: 確認成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AudioFileResponse'
+
+  # ===== Feeds =====
+  /feeds/{podcastId}/rss.xml:
+    get:
+      summary: RSS フィード取得（認証不要）
+      operationId: getFeed
+      tags:
+        - Feeds
+      parameters:
+        - name: podcastId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: RSS フィード
+          content:
+            application/rss+xml:
+              schema:
+                type: string
+        404:
+          description: 番組が見つかりません
+
+  /shows/{podcastId}/feed-settings:
+    get:
+      summary: フィード設定取得
+      operationId: getFeedSettings
+      tags:
+        - Feeds
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: podcastId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: フィード設定
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  feedUrl:
+                    type: string
+                  lastGeneratedAt:
+                    type: string
+                    format: date-time
+                  episodeCount:
+                    type: integer
+
+  # ===== Team =====
+  /shows/{podcastId}/team:
+    get:
+      summary: チームメンバー一覧取得
+      operationId: listTeamMembers
+      tags:
+        - Team
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: podcastId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: チームメンバー一覧
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TeamMemberResponse'
+
+    post:
+      summary: チームメンバー招待（ADMIN のみ）
+      operationId: inviteTeamMember
+      tags:
+        - Team
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: podcastId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                role:
+                  type: string
+                  enum: [ADMIN, EDITOR]
+              required: [email, role]
+      responses:
+        201:
+          description: 招待送信成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  memberId:
+                    type: string
+                  email:
+                    type: string
+                  role:
+                    type: string
+                  invitedAt:
+                    type: string
+                    format: date-time
+
+  /shows/{podcastId}/team/{memberId}:
+    delete:
+      summary: チームメンバー削除（ADMIN のみ）
+      operationId: removeTeamMember
+      tags:
+        - Team
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: podcastId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: memberId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: 削除成功
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: object
+
+    PaginationInfo:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        hasMore:
+          type: boolean
+
+    PodcastResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        author:
+          type: string
+        category:
+          type: array
+          items:
+            type: string
+        language:
+          type: string
+        explicit:
+          type: boolean
+        ownerId:
+          type: string
+        feedUrl:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    PodcastDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/PodcastResponse'
+        - type: object
+          properties:
+            artwork:
+              $ref: '#/components/schemas/ArtworkResponse'
+            episodeCount:
+              type: integer
+            role:
+              type: string
+              enum: [OWNER, ADMIN, EDITOR]
+
+    EpisodeResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        podcastId:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        episodeNumber:
+          type: integer
+        seasonNumber:
+          type: integer
+        publishedAt:
+          type: string
+          format: date-time
+        explicit:
+          type: boolean
+        duration:
+          type: integer
+        audioFile:
+          $ref: '#/components/schemas/AudioFileResponse'
+        createdAt:
+          type: string
+          format: date-time
+
+    AudioFileResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        episodeId:
+          type: string
+        fileName:
+          type: string
+        mimeType:
+          type: string
+        size:
+          type: integer
+        publicUrl:
+          type: string
+        duration:
+          type: integer
+
+    ArtworkResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        podcastId:
+          type: string
+        fileName:
+          type: string
+        width:
+          type: integer
+        height:
+          type: integer
+        mimeType:
+          type: string
+        size:
+          type: integer
+        publicUrl:
+          type: string
+        validationStatus:
+          type: string
+          enum: [PENDING, PASSED, PASSED_WITH_WARNING, FAILED]
+        validationWarnings:
+          type: array
+          items:
+            type: string
+
+    TeamMemberResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        user:
+          type: object
+          properties:
+            name:
+              type: string
+            email:
+              type: string
+        role:
+          type: string
+          enum: [ADMIN, EDITOR]
+        invitedAt:
+          type: string
+          format: date-time
+        acceptedAt:
+          type: string
+          format: date-time
