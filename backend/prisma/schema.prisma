@@ -1,0 +1,136 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String   // hashed password
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  podcasts    Podcast[]
+  teamMembers TeamMember[]
+
+  @@index([email])
+}
+
+// Podcast (Show) model
+model Podcast {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  author      String?
+  category    String?
+  language    String   @default("ja")
+  feedUrl     String   @unique @default(cuid()) // Fixed RSS feed URL identifier
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Owner
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  // Relations
+  episodes    Episode[]
+  artwork     Artwork?
+  teamMembers TeamMember[]
+
+  @@index([ownerId])
+  @@index([feedUrl])
+}
+
+// Episode model
+model Episode {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  publishedAt DateTime?
+  episodeNumber Int?
+  seasonNumber  Int?
+  explicit    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Parent podcast
+  podcastId String
+  podcast   Podcast @relation(fields: [podcastId], references: [id], onDelete: Cascade)
+
+  // Relations
+  audioFile AudioFile?
+
+  @@index([podcastId])
+  @@index([publishedAt])
+}
+
+// AudioFile model
+model AudioFile {
+  id          String   @id @default(cuid())
+  filename    String
+  mimeType    String
+  fileSize    BigInt
+  gcsBucket   String   // GCS bucket name
+  gcsPath     String   // GCS object path
+  r2PublicUrl String?  // R2 public URL (set by external worker)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Parent episode
+  episodeId String  @unique
+  episode   Episode @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+
+  @@index([episodeId])
+}
+
+// Artwork model
+model Artwork {
+  id        String   @id @default(cuid())
+  filename  String
+  mimeType  String
+  width     Int
+  height    Int
+  validated Boolean  @default(false) // Platform spec compliance
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Parent podcast
+  podcastId String  @unique
+  podcast   Podcast @relation(fields: [podcastId], references: [id], onDelete: Cascade)
+
+  @@index([podcastId])
+}
+
+// TeamMember model
+model TeamMember {
+  id    String @id @default(cuid())
+  role  Role   @default(EDITOR)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  podcastId String
+  podcast  Podcast @relation(fields: [podcastId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, podcastId])
+  @@index([userId])
+  @@index([podcastId])
+}
+
+// Enums
+enum Role {
+  ADMIN
+  EDITOR
+}

@@ -1,0 +1,38 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: podcast-manager-db
+    environment:
+      POSTGRES_USER: podcast_user
+      POSTGRES_PASSWORD: podcast_password
+      POSTGRES_DB: podcast_cms
+      TZ: Asia/Tokyo
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U podcast_user -d podcast_cms"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - podcast-network
+
+  adminer:
+    image: adminer:latest
+    container_name: podcast-manager-adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - podcast-network
+
+volumes:
+  postgres_data:
+
+networks:
+  podcast-network:
+    driver: bridge
