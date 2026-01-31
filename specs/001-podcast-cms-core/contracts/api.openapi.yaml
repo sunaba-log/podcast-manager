@@ -75,13 +75,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
         409:
           description: メールアドレスが既に登録済み
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
 
   /auth/login:
     post:
@@ -123,7 +123,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
 
   # ===== Podcasts =====
   /shows:
@@ -161,15 +161,15 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/PodcastResponse'
+                      $ref: "#/components/schemas/PodcastResponse"
                   pagination:
-                    $ref: '#/components/schemas/PaginationInfo'
+                    $ref: "#/components/schemas/PaginationInfo"
         401:
           description: 認証が必要
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
 
     post:
       summary: 新規番組作成
@@ -202,7 +202,7 @@ paths:
                     enum: [Technology, Business, News, Education, Arts]
                 language:
                   type: string
-                  pattern: '^[a-z]{2}$'
+                  pattern: "^[a-z]{2}$"
                 explicit:
                   type: boolean
               required: [title, description]
@@ -212,19 +212,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PodcastResponse'
+                $ref: "#/components/schemas/PodcastResponse"
         400:
           description: バリデーションエラー
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
         401:
           description: 認証が必要
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
 
   /shows/{podcastId}:
     get:
@@ -246,7 +246,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PodcastDetailResponse'
+                $ref: "#/components/schemas/PodcastDetailResponse"
         401:
           description: 認証が必要
         403:
@@ -292,7 +292,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PodcastResponse'
+                $ref: "#/components/schemas/PodcastResponse"
         403:
           description: アクセス権なし（ADMIN 権限が必須）
 
@@ -357,9 +357,9 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/EpisodeResponse'
+                      $ref: "#/components/schemas/EpisodeResponse"
                   pagination:
-                    $ref: '#/components/schemas/PaginationInfo'
+                    $ref: "#/components/schemas/PaginationInfo"
 
     post:
       summary: 新規エピソード作成（ADMIN/EDITOR）
@@ -402,7 +402,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EpisodeResponse'
+                $ref: "#/components/schemas/EpisodeResponse"
 
   /episodes/{episodeId}:
     patch:
@@ -440,7 +440,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EpisodeResponse'
+                $ref: "#/components/schemas/EpisodeResponse"
 
     delete:
       summary: エピソード削除（ADMIN のみ）
@@ -577,7 +577,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AudioFileResponse'
+                $ref: "#/components/schemas/AudioFileResponse"
 
   # ===== Feeds =====
   /feeds/{podcastId}/rss.xml:
@@ -658,7 +658,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/TeamMemberResponse'
+                      $ref: "#/components/schemas/TeamMemberResponse"
 
     post:
       summary: チームメンバー招待（ADMIN のみ）
@@ -793,11 +793,11 @@ components:
 
     PodcastDetailResponse:
       allOf:
-        - $ref: '#/components/schemas/PodcastResponse'
+        - $ref: "#/components/schemas/PodcastResponse"
         - type: object
           properties:
             artwork:
-              $ref: '#/components/schemas/ArtworkResponse'
+              $ref: "#/components/schemas/ArtworkResponse"
             episodeCount:
               type: integer
             role:
@@ -827,7 +827,7 @@ components:
         duration:
           type: integer
         audioFile:
-          $ref: '#/components/schemas/AudioFileResponse'
+          $ref: "#/components/schemas/AudioFileResponse"
         createdAt:
           type: string
           format: date-time

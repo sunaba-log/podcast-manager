@@ -76,6 +76,12 @@ C. RSSフィード生成・出力機能
 specs/001-podcast-cms-core/spec.md Podcastの新エピソード追加では、音声ファイルをGCSにアップロードする。音声ファイルのホストはR2上で実施し、R2上の音声ファイルの変更削除をアプリ経由で可能にする。以上の仕様をspec.mdに記載する必要があれば追記して。
 ```
 
+### 修正 2
+
+```sh
+specs/001-podcast-cms-core/spec.md GCSにアップロードした後にCloud Runで実行される処理は別のリポジトリで管理されているので、本アプリで実装する必要はない。以上の仕様をspec.mdに記載する必要があれば追記して。
+```
+
 ## 5. Break down into tasks
 
 Use /speckit.tasks to create an actionable task list from your implementation plan.
