@@ -11,20 +11,22 @@
 
 ## 技術コンテキスト
 
-**言語/バージョン**: TypeScript 5.x, Next.js 14+ (App Router)  
-**フロントエンド**: Next.js (React), Shadcn UI, TailwindCSS  
-**バックエンド**: Next.js API Routes + Google Cloud Run  
+**言語/バージョン**: Python 3.11+, Next.js 16 (App Router)  
+**フロントエンド**: Next.js 16 (React), Shadcn UI, TailwindCSS  
+**バックエンド**: Python + FastAPI + Google Cloud Run  
+**パッケージ管理**: uv (Python), npm (フロントエンド)  
 **主要依存パッケージ**:
 
-- API/ORM: Prisma, TypeORM
-- ストレージ: Google Cloud Storage SDK, @aws-sdk/client-s3 (Cloudflare R2)
-- RSS生成: rss (npm package), xml2js
-- 型安全性: Zod (バリデーション)
-- テスト: Jest, Playwright, MSW (API mocking)
+- API フレームワーク: FastAPI, Uvicorn
+- ORM: SQLAlchemy 2.0
+- ストレージ: google-cloud-storage, boto3 (Cloudflare R2)
+- RSS生成: feedgen, xml2js
+- バリデーション: Pydantic v2
+- テスト: pytest, pytest-asyncio, Playwright, responses (HTTP mocking)
 
-**ストレージ**: PostgreSQL 14+  
+**ストレージ**: PostgreSQL 17  
 **クラウドストレージ**: Google Cloud Storage (GCS) 音声ファイル、Cloudflare R2 (RSS フィード)  
-**テスト**: Jest (ユニット/統合) + Playwright (E2E)  
+**テスト**: pytest (ユニット/統合) + Playwright (E2E)  
 **ターゲットプラットフォーム**: Web (ブラウザ) + Google Cloud Run  
 **プロジェクトタイプ**: Web アプリケーション（フロントエンド + バックエンド）
 
@@ -57,8 +59,8 @@ _ゲート: Phase 0 研究前に合格する必要があります。Phase 1 デ�
 
 | 原則               | 要件                                                  | 状態                |
 | ------------------ | ----------------------------------------------------- | ------------------- |
-| I. コード品質      | ESLint/Prettier で一貫性を強制; TypeScript 厳密モード | ✅ 計画に含む       |
-| II. テスト基準     | 80%+ カバレッジ; Jest + Playwright; TDD ワークフロー  | ✅ 計画に含む       |
+| I. コード品質      | Ruff/Black で Python 一貫性を強制; 型チェック有効    | ✅ 計画に含む       |
+| II. テスト基準     | 80%+ カバレッジ; pytest + Playwright; TDD ワークフロー | ✅ 計画に含む       |
 | III. UX一貫性      | Shadcn UI で デザイン一貫; エラーメッセージ明確化     | ✅ 計画に含む       |
 | IV. パフォーマンス | API < 500ms (p95); RSS < 2s; UI < 100ms               | ✅ 計画に含む       |
 | コードレビュー     | PR レビュー必須                                       | ✅ プロセスに含む   |
@@ -126,49 +128,54 @@ specs/001-podcast-cms-core/
 │   └── next.config.js
 │
 ├── backend/
-│   ├── src/
+│   ├── app/
 │   │   ├── api/
 │   │   │   ├── routes/
-│   │   │   │   ├── shows.ts        # 番組エンドポイント
-│   │   │   │   ├── episodes.ts     # エピソードエンドポイント
-│   │   │   │   ├── feeds.ts        # フィード生成エンドポイント
-│   │   │   │   └── auth.ts
+│   │   │   │   ├── shows.py        # 番組エンドポイント
+│   │   │   │   ├── episodes.py     # エピソードエンドポイント
+│   │   │   │   ├── feeds.py        # フィード生成エンドポイント
+│   │   │   │   └── auth.py
 │   │   │   └── middleware/
-│   │   │       ├── auth.ts
-│   │   │       └── validation.ts
+│   │   │       ├── auth.py
+│   │   │       └── validation.py
 │   │   ├── services/
-│   │   │   ├── podcast.service.ts   # 番組ビジネスロジック
-│   │   │   ├── episode.service.ts   # エピソードビジネスロジック
-│   │   │   ├── feed.service.ts      # RSS 生成ロジック
-│   │   │   ├── storage.service.ts   # GCS/R2 インタラクション
-│   │   │   └── auth.service.ts
+│   │   │   ├── podcast.py          # 番組ビジネスロジック
+│   │   │   ├── episode.py          # エピソードビジネスロジック
+│   │   │   ├── feed.py             # RSS 生成ロジック
+│   │   │   ├── storage.py          # GCS/R2 インタラクション
+│   │   │   └── auth.py
 │   │   ├── models/
-│   │   │   ├── podcast.ts
-│   │   │   ├── episode.ts
-│   │   │   └── user.ts
-│   │   ├── events/                  # イベント定義
-│   │   │   └── episode-deleted.ts   # エピソード削除イベント
+│   │   │   ├── podcast.py
+│   │   │   ├── episode.py
+│   │   │   └── user.py
+│   │   ├── events/                 # イベント定義
+│   │   │   └── episode_deleted.py  # エピソード削除イベント
+│   │   ├── core/
+│   │   │   ├── config.py           # 設定管理
+│   │   │   ├── database.py         # SQLAlchemy セッション
+│   │   │   ├── security.py         # JWT 認証
+│   │   │   └── errors.py           # エラーハンドリング
 │   │   ├── lib/
-│   │   │   ├── db.ts               # Prisma クライアント
-│   │   │   ├── gcs.ts              # Google Cloud Storage (署名付きURL生成、削除イベント)
-│   │   │   └── validators.ts       # Zod スキーマ
-│   │   └── types/
+│   │   │   ├── gcs.py              # Google Cloud Storage (署名付きURL生成、削除イベント)
+│   │   │   └── validators.py       # Pydantic スキーマ
+│   │   ├── main.py                 # FastAPI アプリケーションエントリポイント
+│   │   └── __init__.py
 │   ├── tests/
 │   │   ├── unit/
 │   │   ├── integration/
 │   │   └── contract/               # API コントラクトテスト
-│   ├── prisma/
-│   │   ├── schema.prisma           # データモデル定義
-│   │   └── migrations/
-│   ├── package.json
-│   ├── tsconfig.json
-│   └── Dockerfile                  # Cloud Run デプロイ用
+│   ├── migrations/                 # Alembic マイグレーション
+│   ├── pyproject.toml              # uv プロジェクト定義
+│   ├── uv.lock                     # uv ロックファイル
+│   ├── Dockerfile                  # Cloud Run デプロイ用
+│   └── .dockerignore
 │
 ├── shared/
 │   ├── types/
-│   │   ├── api.ts                  # 共有 API 型定義
-│   │   └── domain.ts               # 共有 ドメイン型定義
-│   └── package.json
+│   │   ├── api.py                  # 共有 API 型定義
+│   │   └── domain.py               # 共有 ドメイン型定義
+│   ├── pyproject.toml
+│   └── uv.lock
 │
 ├── .specify/                        # Speckit 設定
 ├── .github/
@@ -181,7 +188,7 @@ specs/001-podcast-cms-core/
 └── package.json                    # ルートレベル依存管理
 ```
 
-**構造決定**: Web アプリケーション構造を採用。フロントエンド (Next.js App Router) とバックエンド (API Routes + Google Cloud Run) を分離し、スケーラビリティと責任の分離を実現。Prisma ORM で PostgreSQL データベースを管理。GCS と Cloudflare R2 でメディアファイルとフィード配信を管理。
+**構造決定**: Web アプリケーション構造を採用。フロントエンド (Next.js 16 App Router) とバックエンド (FastAPI + Google Cloud Run) を分離し、スケーラビリティと責任の分離を実現。SQLAlchemy 2.0 ORM で PostgreSQL 17 データベースを管理。uv でバックエンド依存パッケージを管理。GCS と Cloudflare R2 でメディアファイルとフィード配信を管理。
 
 ## 複雑性追跡
 
@@ -204,11 +211,12 @@ specs/001-podcast-cms-core/
 1. Google Cloud Storage との署名付きURL統合パターン（アップロード、削除イベント）
 2. Google Cloud Pub/Sub を用いた GCS → R2 コピーのイベント駆動アーキテクチャ（別リポジトリ実装）
 3. イベントベース削除通知の仕様（エピソード削除時の GCS/R2 クリーンアップ）
-4. Prisma による複雑な関連付けと権限管理
-5. Next.js App Router での認証フローベストプラクティス
+4. SQLAlchemy 2.0 による複雑な関連付けと権限管理
+5. FastAPI での JWT 認証フローとベストプラクティス
 6. Shadcn UI カスタマイズとアクセシビリティ実装
-7. Jest + Playwright でのテスト戦略（API + E2E）
+7. pytest + Playwright でのテスト戦略（API + E2E）
 8. RSS フィード生成の検証ルール（Podcast Namespace）- R2 URL を Enclosure に含める
+9. Python 非同期処理（asyncio）と FastAPI の統合パターン
 
 **出力**: `research.md` (すべての NEEDS CLARIFICATION を解決)
 
@@ -220,7 +228,7 @@ specs/001-podcast-cms-core/
 
 1. **データモデル** (`data-model.md`):
    - User, Podcast, Episode, TeamMember, AudioFile, Artwork エンティティ定義
-   - Prisma スキーマで実装
+   - SQLAlchemy モデルクラスで実装
    - リレーションシップと権限ロジック
 
 2. **API コントラクト** (`contracts/`):
@@ -238,7 +246,7 @@ specs/001-podcast-cms-core/
 
 4. **エージェントコンテキスト更新**:
    - `.specify/scripts/bash/update-agent-context.sh copilot` を実行
-   - Copilot に Next.js + Prisma + GCS/R2 技術スタックを通知
+   - Copilot に Next.js 16 + FastAPI + SQLAlchemy + uv 技術スタックを通知
 
 **出力**: `data-model.md`, `contracts/`, `quickstart.md`, エージェントコンテキスト更新
 
