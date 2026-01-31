@@ -21,10 +21,12 @@
 | updatedAt | DateTime | 更新日時 | AUTO UPDATE |
 
 **リレーション**:
+
 - `ownedPodcasts`: 所有している番組（1対多）
 - `teamMemberships`: チームメンバーとして参加している番組（多対多）
 
 **バリデーション**:
+
 - email: 有効なメールアドレス形式
 - password: 最小8文字、大文字・小文字・数字を含む
 - name: 1~100文字
@@ -52,12 +54,14 @@
 | updatedAt | DateTime | 更新日時 | AUTO UPDATE |
 
 **リレーション**:
+
 - `owner`: 所有ユーザー（多対1）
 - `episodes`: 含まれるエピソード（1対多）
 - `artwork`: カバーアート（1対1）
 - `teamMembers`: チームメンバー（1対多）
 
 **バリデーション**:
+
 - title: 1~255文字
 - description: 1~1000文字
 - category: 有効なカテゴリのみ（Technology, Business, News, Education, Arts等）
@@ -65,6 +69,7 @@
 - feedUrl: 自動生成 `/feeds/{podcastId}/rss.xml`
 
 **インデックス**:
+
 - (ownerId, language)
 - (createdAt DESC) - 最新番組の取得
 
@@ -90,10 +95,12 @@
 | updatedAt | DateTime | 更新日時 | AUTO UPDATE |
 
 **リレーション**:
+
 - `podcast`: 親番組（多対1）
 - `audioFile`: 音声ファイル（1対1）
 
 **バリデーション**:
+
 - title: 1~255文字
 - description: 1~5000文字
 - episodeNumber: 1以上
@@ -102,6 +109,7 @@
 - duration: 60以上（秒）
 
 **インデックス**:
+
 - (podcastId, publishedAt DESC) - エピソード一覧の高速取得
 - (podcastId, seasonNumber, episodeNumber) - シーズンごと取得
 
@@ -126,14 +134,17 @@
 | createdAt | DateTime | 作成日時 | DEFAULT now() |
 
 **リレーション**:
+
 - `episode`: 親エピソード（多対1）
 
 **バリデーション**:
+
 - mimeType: 'audio/mpeg' または 'audio/aac' のみ
 - size: 10MB以上、5GB以下
 - gcsPath: GCS内パス形式 `/podcast/{podcastId}/episodes/{episodeId}/audio.*`
 
 **バックアップ戦略**:
+
 - GCS の 30 日間バージョン履歴を有効化
 - Cloudflare R2 には RSS フィード生成時に参照URL を保存
 
@@ -161,15 +172,18 @@
 | createdAt | DateTime | 作成日時 | DEFAULT now() |
 
 **Enum**: ValidationStatus
+
 - PENDING: 検証待ち
 - PASSED: 推奨規格クリア
 - PASSED_WITH_WARNING: 規格外だが許可
 - FAILED: 使用不可
 
 **リレーション**:
+
 - `podcast`: 親番組（多対1）
 
 **バリデーション**:
+
 - mimeType: 'image/jpeg', 'image/png', 'image/webp' のみ
 - 画像サイズ: 3000x3000px 以上推奨
   - 警告: 1000~2999px
@@ -194,14 +208,17 @@
 | createdAt | DateTime | 作成日時 | DEFAULT now() |
 
 **Enum**: Role
+
 - ADMIN: 番組の設定、メンバー管理、削除が可能
 - EDITOR: エピソード、メタデータの編集のみ可能
 
 **リレーション**:
+
 - `user`: ユーザー（多対1）
 - `podcast`: 番組（多対1）
 
 **制約**:
+
 - UNIQUE(userId, podcastId): 同じメンバーが複数回追加されない
 - 1つの番組に最低1人の ADMIN が必須
 
@@ -272,7 +289,7 @@ model Episode {
   id            String  @id @default(cuid())
   podcastId     String
   podcast       Podcast @relation(fields: [podcastId], references: [id], onDelete: Cascade)
-  
+
   title         String
   description   String  @db.Text
   episodeNumber Int?
@@ -342,10 +359,10 @@ model TeamMember {
   id        String  @id @default(cuid())
   userId    String
   user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   podcastId String
   podcast   Podcast @relation(fields: [podcastId], references: [id], onDelete: Cascade)
-  
+
   role      Role
   invitedAt DateTime @default(now())
   acceptedAt DateTime?
@@ -470,6 +487,7 @@ npx prisma migrate dev --name init
 ```
 
 生成されるマイグレーション:
+
 1. User テーブル作成
 2. Podcast テーブル作成
 3. Episode テーブル作成
@@ -484,28 +502,28 @@ npx prisma migrate dev --name init
 
 ### API エンドポイント別アクセス制御
 
-| エンドポイント | ADMIN | EDITOR | 非メンバー |
-|-------------|------|--------|-----------|
-| GET /shows | ✅ | ✅ | ❌ |
-| POST /shows | ✅ | ❌ | ❌ |
-| PATCH /shows/{id} | ✅ | ❌ | ❌ |
-| DELETE /shows/{id} | ✅ | ❌ | ❌ |
-| POST /shows/{id}/episodes | ✅ | ✅ | ❌ |
-| PATCH /episodes/{id} | ✅ | ✅ | ❌ |
-| DELETE /episodes/{id} | ✅ | ❌ | ❌ |
-| POST /shows/{id}/team | ✅ | ❌ | ❌ |
-| DELETE /shows/{id}/team/{userId} | ✅ | ❌ | ❌ |
+| エンドポイント                   | ADMIN | EDITOR | 非メンバー |
+| -------------------------------- | ----- | ------ | ---------- |
+| GET /shows                       | ✅    | ✅     | ❌         |
+| POST /shows                      | ✅    | ❌     | ❌         |
+| PATCH /shows/{id}                | ✅    | ❌     | ❌         |
+| DELETE /shows/{id}               | ✅    | ❌     | ❌         |
+| POST /shows/{id}/episodes        | ✅    | ✅     | ❌         |
+| PATCH /episodes/{id}             | ✅    | ✅     | ❌         |
+| DELETE /episodes/{id}            | ✅    | ❌     | ❌         |
+| POST /shows/{id}/team            | ✅    | ❌     | ❌         |
+| DELETE /shows/{id}/team/{userId} | ✅    | ❌     | ❌         |
 
 ### 権限チェック実装
 
 ```typescript
 // backend/src/middleware/auth.ts
-import { Role } from '@prisma/client';
+import { Role } from "@prisma/client";
 
 export async function checkPodcastAccess(
   userId: string,
   podcastId: string,
-  requiredRole: Role = 'EDITOR'
+  requiredRole: Role = "EDITOR",
 ): Promise<boolean> {
   const membership = await prisma.teamMember.findUnique({
     where: { userId_podcastId: { userId, podcastId } },
@@ -520,8 +538,8 @@ export async function checkPodcastAccess(
   }
 
   // ロール判定
-  if (requiredRole === 'ADMIN') {
-    return membership.role === 'ADMIN';
+  if (requiredRole === "ADMIN") {
+    return membership.role === "ADMIN";
   }
   return true;
 }

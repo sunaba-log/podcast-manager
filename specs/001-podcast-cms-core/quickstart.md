@@ -5,6 +5,7 @@
 **対象読者**: 開発者、QA、デザイナー
 
 ## 目次
+
 1. [システム要件](#システム要件)
 2. [ローカル開発環境セットアップ](#ローカル開発環境セットアップ)
 3. [初回実行](#初回実行)
@@ -16,6 +17,7 @@
 ## システム要件
 
 ### 必須環境
+
 - **Node.js**: 18.x 以上（推奨: 20.x LTS）
 - **npm**: 9.x 以上 または **pnpm**: 8.x 以上
 - **Docker**: 24.x 以上（ローカルDB用）
@@ -24,10 +26,12 @@
 - **PostgreSQL クライアント**: `psql` コマンド（オプション、デバッグ用）
 
 ### クラウドアカウント（本番/ステージング）
+
 - **Google Cloud**: GCS アクセス権
 - **Cloudflare**: R2 アクセス権
 
 ### ブラウザ
+
 - Chrome/Edge/Firefox 最新版（ローカル開発では何でも可）
 
 ---
@@ -45,6 +49,7 @@ git checkout 001-podcast-cms-core
 ### ステップ 2: 環境変数ファイルの作成
 
 **frontend/.env.local**
+
 ```bash
 # Next.js 基本設定
 NEXT_PUBLIC_API_BASE_URL=http://localhost:3000
@@ -56,6 +61,7 @@ NEXTAUTH_SECRET=dev-secret-key-change-in-production-$(openssl rand -base64 32)
 ```
 
 **backend/.env.local**
+
 ```bash
 # データベース
 DATABASE_URL="postgresql://podcast_user:podcast_pass@localhost:5432/podcast_manager_dev"
@@ -87,6 +93,7 @@ docker-compose up -d postgres
 ```
 
 **確認**:
+
 ```bash
 docker-compose ps
 # postgres が "Up" 状態であることを確認
@@ -133,6 +140,7 @@ npx prisma db seed
 ```
 
 **マイグレーション確認**:
+
 ```bash
 psql $DATABASE_URL -c "\dt"
 # User, Podcast, Episode, AudioFile, Artwork, TeamMember テーブルが表示されることを確認
@@ -145,6 +153,7 @@ psql $DATABASE_URL -c "\dt"
 ### ローカル開発サーバー起動
 
 **ターミナル 1: バックエンドサーバー**
+
 ```bash
 cd backend
 npm run dev
@@ -152,6 +161,7 @@ npm run dev
 ```
 
 **ターミナル 2: フロントエンドサーバー**
+
 ```bash
 cd frontend
 npm run dev
@@ -187,6 +197,7 @@ http://localhost:3000
    - パスワード: `TestPassword123!`
 
 2. **ダッシュボード → 番組管理 → 新規作成**
+
    ```
    タイトル: "My Test Podcast"
    説明: "A test podcast for development"
@@ -203,6 +214,7 @@ http://localhost:3000
 ### ユースケース 2: エピソードを追加
 
 1. **番組詳細 → エピソード管理 → 新規作成**
+
    ```
    タイトル: "Episode 1: Introduction"
    説明: "Welcome to the show!"
@@ -229,11 +241,13 @@ http://localhost:3000
 ### ユースケース 4: RSS フィード確認
 
 **固定フィード URL** を確認：
+
 ```bash
 curl http://localhost:3001/feeds/{podcastId}/rss.xml
 ```
 
 **出力**: 有効な XML フィード
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
@@ -260,7 +274,7 @@ User: creator@example.com (所有者)
       │   └─ AudioFile: sample-audio.mp3 (mock)
       ├─ Episode 2: "Deep Dive"
       └─ Artwork: test-cover.jpg (3000x3000px mock)
-  
+
   └─ Podcast: "Test Show #2"
       └─ Episode 1: "Pilot"
 
@@ -269,12 +283,14 @@ User: editor@example.com
 ```
 
 **シード実行**
+
 ```bash
 cd backend
 npx prisma db seed
 ```
 
 **削除してリセット**
+
 ```bash
 cd backend
 npx prisma migrate reset
@@ -341,6 +357,7 @@ npx prisma migrate deploy
 ### cURL でエンドポイント確認
 
 **ユーザー登録**
+
 ```bash
 curl -X POST http://localhost:3001/api/v1/auth/register \
   -H "Content-Type: application/json" \
@@ -352,6 +369,7 @@ curl -X POST http://localhost:3001/api/v1/auth/register \
 ```
 
 **ログイン**
+
 ```bash
 curl -X POST http://localhost:3001/api/v1/auth/login \
   -H "Content-Type: application/json" \
@@ -363,6 +381,7 @@ curl -X POST http://localhost:3001/api/v1/auth/login \
 ```
 
 **番組一覧取得**
+
 ```bash
 curl -X GET http://localhost:3001/api/v1/shows \
   -H "Authorization: Bearer {トークン}"
@@ -448,12 +467,14 @@ npm run test:gcs-signing
 ## 次のステップ
 
 1. **UI/UX デザイン**: Storybook で Shadcn UI コンポーネント確認
+
    ```bash
    cd frontend
    npm run storybook
    ```
 
 2. **E2E テスト作成**: Playwright で ユーザーフロー検証
+
    ```bash
    cd frontend
    npm run test:e2e
@@ -470,10 +491,11 @@ npm run test:gcs-signing
 問題が発生した場合:
 
 1. **ログ確認**
+
    ```bash
    # フロントエンド
    npm run dev -- --debug
-   
+
    # バックエンド
    LOG_LEVEL=debug npm run dev
    ```
