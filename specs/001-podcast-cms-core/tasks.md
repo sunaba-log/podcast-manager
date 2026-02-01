@@ -61,19 +61,19 @@
 
 ### 実装 - ユーザーストーリー1
 
-- [ ] T021 [P] [US1] Podcast SQLAlchemy モデルと migration を `/backend/app/models/podcast.py` に定義
-- [ ] T022 [P] [US1] 番組作成エンドポイント `POST /api/shows` を `/backend/app/api/routes/shows.py` に実装
-- [ ] T023 [P] [US1] 番組取得エンドポイント `GET /api/shows/:id` を `/backend/app/api/routes/shows.py` に実装
-- [ ] T024 [P] [US1] 番組一覧エンドポイント `GET /api/shows` を `/backend/app/api/routes/shows.py` に実装
-- [ ] T025 [P] [US1] 番組更新エンドポイント `PUT /api/shows/:id` を `/backend/app/api/routes/shows.py` に実装
-- [ ] T026 [US1] Podcast ビジネスロジックサービスを `/backend/app/services/podcast.py` に実装（依存：T022-T025）
-- [ ] T027 [P] [US1] 番組作成フォームコンポーネントを `/frontend/src/components/forms/CreateShowForm.tsx` に実装
-- [ ] T028 [P] [US1] 番組編集フォームコンポーネントを `/frontend/src/components/forms/EditShowForm.tsx` に実装
-- [ ] T029 [P] [US1] 番組詳細ページを `/frontend/src/app/(dashboard)/shows/[id]/page.tsx` に実装
-- [ ] T030 [P] [US1] ダッシュボード - 番組リスト表示ページを `/frontend/src/app/(dashboard)/shows/page.tsx` に実装
-- [ ] T031 [US1] 番組メタデータ入力検証を `/backend/app/lib/validators.py` に追加（依存：T013）
-- [ ] T032 [US1] 言語オプションドロップダウンコンポーネントを `/frontend/src/components/ui/LanguageSelect.tsx` に実装
-- [ ] T033 [US1] 数ユーザーによる初期テストおよびUX検証
+- [x] T021 [P] [US1] Podcast SQLAlchemy モデルと migration を `/backend/app/models/podcast.py` に定義
+- [x] T022 [P] [US1] 番組作成エンドポイント `POST /api/shows` を `/backend/app/api/routes/shows.py` に実装
+- [x] T023 [P] [US1] 番組取得エンドポイント `GET /api/shows/:id` を `/backend/app/api/routes/shows.py` に実装
+- [x] T024 [P] [US1] 番組一覧エンドポイント `GET /api/shows` を `/backend/app/api/routes/shows.py` に実装
+- [x] T025 [P] [US1] 番組更新エンドポイント `PUT /api/shows/:id` を `/backend/app/api/routes/shows.py` に実装
+- [x] T026 [US1] Podcast ビジネスロジックサービスを `/backend/app/services/podcast.py` に実装（依存：T022-T025）
+- [x] T027 [P] [US1] 番組作成フォームコンポーネントを `/frontend/src/components/forms/CreateShowForm.tsx` に実装
+- [x] T028 [P] [US1] 番組編集フォームコンポーネントを `/frontend/src/components/forms/EditShowForm.tsx` に実装
+- [x] T029 [P] [US1] 番組詳細ページを `/frontend/src/app/(dashboard)/shows/[id]/page.tsx` に実装
+- [x] T030 [P] [US1] ダッシュボード - 番組リスト表示ページを `/frontend/src/app/(dashboard)/shows/page.tsx` に実装
+- [x] T031 [US1] 番組メタデータ入力検証を `/backend/app/lib/validators.py` に追加（依存：T013）
+- [x] T032 [US1] 言語オプションドロップダウンコンポーネントを `/frontend/src/components/ui/LanguageSelect.tsx` に実装
+- [x] T033 [US1] 数ユーザーによる初期テストおよびUX検証
 
 **チェックポイント**: ユーザーストーリー1 完全実装・テスト完了 - MVP コア機能1つ目
 

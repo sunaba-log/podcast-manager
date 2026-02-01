@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient, API_ENDPOINTS } from '@/lib/api';
 import { Button } from '@/components/ui/button';
@@ -8,14 +8,16 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LanguageSelect } from '@/components/ui/LanguageSelect';
 
-interface CreateShowFormProps {
+interface EditShowFormProps {
+  podcastId: string;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
 
-export function CreateShowForm({ onSuccess, onCancel }: CreateShowFormProps) {
+export function EditShowForm({ podcastId, onSuccess, onCancel }: EditShowFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
   const [error, setError] = useState<string>('');
   const [formData, setFormData] = useState({
     title: '',
@@ -24,6 +26,28 @@ export function CreateShowForm({ onSuccess, onCancel }: CreateShowFormProps) {
     category: '',
     language: 'ja',
   });
+
+  useEffect(() => {
+    const fetchPodcast = async () => {
+      try {
+        setIsFetching(true);
+        const response = await apiClient.get(API_ENDPOINTS.PODCASTS.GET(podcastId));
+        setFormData({
+          title: response.title,
+          description: response.description,
+          author: response.author || '',
+          category: response.category || '',
+          language: response.language || 'ja',
+        });
+      } catch (err) {
+        setError(apiClient.handleError(err as any) || 'Failed to load podcast');
+      } finally {
+        setIsFetching(false);
+      }
+    };
+
+    fetchPodcast();
+  }, [podcastId]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -41,20 +65,30 @@ export function CreateShowForm({ onSuccess, onCancel }: CreateShowFormProps) {
     setError('');
 
     try {
-      await apiClient.post(API_ENDPOINTS.PODCASTS.CREATE, formData);
+      await apiClient.put(API_ENDPOINTS.PODCASTS.UPDATE(podcastId), formData);
       onSuccess?.();
       router.refresh();
     } catch (err) {
-      setError(apiClient.handleError(err as any) || 'Failed to create podcast');
+      setError(apiClient.handleError(err as any) || 'Failed to update podcast');
     } finally {
       setIsLoading(false);
     }
   };
 
+  if (isFetching) {
+    return (
+      <Card className="w-full">
+        <CardContent className="p-6">
+          <div className="text-center">Loading...</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Create New Podcast</CardTitle>
+        <CardTitle>Edit Podcast</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -140,7 +174,7 @@ export function CreateShowForm({ onSuccess, onCancel }: CreateShowFormProps) {
 
           <div className="flex gap-2">
             <Button type="submit" disabled={isLoading} className="flex-1">
-              {isLoading ? 'Creating...' : 'Create Podcast'}
+              {isLoading ? 'Saving...' : 'Save Changes'}
             </Button>
             <Button
               type="button"
