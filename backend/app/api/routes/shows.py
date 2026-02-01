@@ -1,23 +1,20 @@
 """Podcast shows management endpoints."""
 
-from typing import List
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import get_db
-from app.core.errors import NotFoundException, UnauthorizedException, ValidationException
-from app.core.security import check_podcast_ownership, RoleEnum
 from app.api.middleware.auth import get_current_user
+from app.core.database import get_db
+from app.core.errors import NotFoundException, UnauthorizedException
 from app.lib.validators import (
     PodcastCreate,
-    PodcastUpdate,
     PodcastResponse,
-    UserResponse,
+    PodcastUpdate,
 )
-from app.models.base import User, Podcast
-from sqlalchemy import select
+from app.models.base import Podcast, User
 
 router = APIRouter()
 
@@ -77,11 +74,11 @@ async def get_podcast(
     return PodcastResponse.from_orm(podcast)
 
 
-@router.get("", response_model=List[PodcastResponse])
+@router.get("", response_model=list[PodcastResponse])
 async def list_podcasts(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-) -> List[PodcastResponse]:
+) -> list[PodcastResponse]:
     """
     List all podcasts owned by the current user.
     """

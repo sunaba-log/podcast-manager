@@ -1,17 +1,14 @@
-import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.middleware.auth import router as auth_router
 from app.api.routes.shows import router as shows_router
-from app.api.routes.episodes import router as episodes_router
+from app.core.config import settings
 from app.core.database import engine
-from app.core.errors import APIException, api_exception_handler
-from app.core.logging import setup_logging, get_logger
+from app.core.errors import add_exception_handlers
+from app.core.logging import get_logger, setup_logging
 from app.models.base import Base
-from app.config import settings
 
 # Setup logging
 setup_logging()
@@ -51,13 +48,11 @@ app.add_middleware(
 )
 
 # Exception handlers
-app.add_exception_handler(APIException, api_exception_handler)
+add_exception_handlers(app)
 
 
 # Include routers
-app.include_router(auth_router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(shows_router, prefix="/api/shows", tags=["Shows"])
-app.include_router(episodes_router, prefix="/api/shows/{show_id}/episodes", tags=["Episodes"])
 
 
 # Health check endpoint

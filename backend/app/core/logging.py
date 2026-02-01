@@ -1,5 +1,7 @@
 import logging
 import logging.config
+from pathlib import Path
+
 from app.core.config import settings
 
 LOGGING_CONFIG = {
@@ -55,6 +57,9 @@ LOGGING_CONFIG = {
 
 def setup_logging() -> None:
     """Setup application logging"""
+    # Create logs directory if it doesn't exist
+    log_dir = Path(settings.LOGS_DIR)
+    log_dir.mkdir(parents=True, exist_ok=True)
     logging.config.dictConfig(LOGGING_CONFIG)
 
 

@@ -133,6 +133,16 @@ npm run lint
 
 ### ステップ 5: バックエンド環境のセットアップ
 
+**環境変数を追加する**:
+
+`backend/.env`
+
+```sh
+DATABASE_URL="<>"
+```
+
+**マイグレーションを実行する**:
+
 ```bash
 cd ../backend
 
@@ -147,6 +157,9 @@ uv run alembic upgrade head
 ```
 
 **マイグレーション確認**:
+
+> [!NOTE]  
+> psqlをインストールしていない場合は、インストールする。
 
 ```bash
 psql $DATABASE_URL -c "\dt"
@@ -173,6 +186,8 @@ uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```bash
 cd frontend
 npm run dev
+# or
+pnpm dev
 # フロントエンド起動: http://localhost:3000
 ```
 
