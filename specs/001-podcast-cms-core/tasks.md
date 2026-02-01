@@ -35,19 +35,19 @@
 
 ⚠️ **CRITICAL**: このフェーズが完了するまでユーザーストーリーの実装は開始できない
 
-- [ ] T008 SQLAlchemy モデルを `/backend/app/models/` に定義（User, Podcast, Episode, AudioFile, Artwork, TeamMember）
-- [ ] T009 [P] Alembic マイグレーション初期化を `/backend/migrations/` に実行
-- [ ] T010 [P] SQLAlchemy ORM クライアント・セッションを `/backend/app/core/database.py` に実装
-- [ ] T011 [P] JWT 認証ミドルウェアを `/backend/app/api/middleware/auth.py` に実装
-- [ ] T012 [P] 認可・ロール管理ロジックを `/backend/app/core/security.py` に実装
-- [ ] T013 [P] Pydantic スキーマ（バリデーション）を `/backend/app/lib/validators.py` に定義
-- [ ] T014 [P] API エラーハンドリング統一フォーマットを `/backend/app/core/errors.py` に実装
-- [ ] T015 [P] ロギング設定を `/backend/app/core/` に実装
-- [ ] T016 Google Cloud Storage (GCS) SDK 統合を `/backend/app/lib/gcs.py` に実装（署名付きURL生成、削除イベント）
-- [ ] T017 [P] 環境変数設定テンプレートを `.env.example` に作成（Python/FastAPI用）
-- [ ] T018 [P] FastAPI アプリケーションエントリポイント `/backend/app/main.py` を作成（ルーター登録）
-- [ ] T019 [P] フロントエンド Shadcn UI コンポーネント基盤を `/frontend/src/components/ui/` に作成
-- [ ] T020 [P] フロントエンド API クライアント実装を `/frontend/src/lib/api.ts` に作成（Next.js 16対応）
+- [x] T008 SQLAlchemy モデルを `/backend/app/models/` に定義（User, Podcast, Episode, AudioFile, Artwork, TeamMember）
+- [x] T009 [P] Alembic マイグレーション初期化を `/backend/migrations/` に実行
+- [x] T010 [P] SQLAlchemy ORM クライアント・セッションを `/backend/app/core/database.py` に実装
+- [x] T011 [P] JWT 認証ミドルウェアを `/backend/app/api/middleware/auth.py` に実装
+- [x] T012 [P] 認可・ロール管理ロジックを `/backend/app/core/security.py` に実装
+- [x] T013 [P] Pydantic スキーマ（バリデーション）を `/backend/app/lib/validators.py` に定義
+- [x] T014 [P] API エラーハンドリング統一フォーマットを `/backend/app/core/errors.py` に実装
+- [x] T015 [P] ロギング設定を `/backend/app/core/` に実装
+- [x] T016 Google Cloud Storage (GCS) SDK 統合を `/backend/app/lib/gcs.py` に実装（署名付きURL生成、削除イベント）
+- [x] T017 [P] 環境変数設定テンプレートを `.env.example` に作成（Python/FastAPI用）
+- [x] T018 [P] FastAPI アプリケーションエントリポイント `/backend/app/main.py` を作成（ルーター登録）
+- [x] T019 [P] フロントエンド Shadcn UI コンポーネント基盤を `/frontend/src/components/ui/` に作成
+- [x] T020 [P] フロントエンド API クライアント実装を `/frontend/src/lib/api.ts` に作成（Next.js 16対応）
 
 **チェックポイント**: 基盤準備完了 - ユーザーストーリー実装が並列実行可能
 

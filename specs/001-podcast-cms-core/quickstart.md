@@ -18,6 +18,8 @@
 
 ### 必須環境
 
+- **Python**: 3.11 以上（推奨: 3.12 LTS）
+- **uv**: 最新版（Python パッケージマネージャー）
 - **Node.js**: 18.x 以上（推奨: 20.x LTS）
 - **npm**: 9.x 以上 または **pnpm**: 8.x 以上
 - **Docker**: 24.x 以上（ローカルDB用）
@@ -48,40 +50,53 @@ git checkout 001-podcast-cms-core
 
 ### ステップ 2: 環境変数ファイルの作成
 
-**frontend/.env.local**
+**.env.local** (リポジトリルート)
 
 ```bash
-# Next.js 基本設定
-NEXT_PUBLIC_API_BASE_URL=http://localhost:3000
-NEXT_PUBLIC_APP_NAME="Podcast Manager"
+# Backend Database
+DATABASE_URL=postgresql+asyncpg://podcast_user:podcast_password@localhost:5432/podcast_cms
 
-# 認証（NextAuth.js）
-NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=dev-secret-key-change-in-production-$(openssl rand -base64 32)
-```
+# FastAPI Configuration
+DEBUG=true
+API_PORT=8000
+API_HOST=0.0.0.0
+CORS_ORIGINS=["http://localhost:3000"]
 
-**backend/.env.local**
+# Frontend Configuration
+FRONTEND_URL=http://localhost:3000
+NEXT_PUBLIC_API_URL=http://localhost:8000
 
-```bash
-# データベース
-DATABASE_URL="postgresql://podcast_user:podcast_pass@localhost:5432/podcast_manager_dev"
+# JWT Configuration
+SECRET_KEY=your-super-secret-jwt-key-change-in-production
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
 
-# Google Cloud Storage
-GCP_PROJECT_ID="your-gcp-project-id"
-GCS_BUCKET_NAME="podcast-manager-dev"
-GCS_CREDENTIAL_PATH="./credentials-gcs.json"
+# Google Cloud Storage (GCS)
+GCS_PROJECT_ID=your-gcp-project-id
+GCS_BUCKET_NAME=podcast-manager-audio
+GCS_SERVICE_ACCOUNT_JSON=/path/to/gcp-key.json
 
-# Cloudflare R2
-R2_ENDPOINT="https://<account-id>.r2.cloudflarestorage.com"
-R2_ACCESS_KEY_ID="your-r2-key-id"
-R2_SECRET_ACCESS_KEY="your-r2-secret"
-R2_BUCKET_NAME="podcast-feeds"
-R2_PUBLIC_URL="https://feeds.example.com"
+# Cloudflare R2 (for RSS feed storage)
+R2_ACCOUNT_ID=your-r2-account-id
+R2_ACCESS_KEY_ID=your-r2-access-key
+R2_SECRET_ACCESS_KEY=your-r2-secret-key
+R2_BUCKET_NAME=podcast-feeds
+R2_PUBLIC_URL=https://your-r2-public-url.com
 
-# アプリケーション
-NODE_ENV=development
-LOG_LEVEL=debug
-PORT=3001
+# Email Configuration (for team invitations)
+SMTP_SERVER=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+SENDER_EMAIL=noreply@podcast-manager.com
+SENDER_NAME=Podcast Manager
+
+# Logging
+LOG_LEVEL=INFO
+LOGS_DIR=./logs
+
+# Environment
+ENVIRONMENT=development
 ```
 
 ### ステップ 3: Docker で PostgreSQL の起動
@@ -109,9 +124,6 @@ npm install
 # または
 pnpm install
 
-# Shadcn UI コンポーネントの初期化
-npx shadcn-ui@latest init
-
 # TypeScript 型チェック
 npm run type-check
 
@@ -124,26 +136,21 @@ npm run lint
 ```bash
 cd ../backend
 
-# 依存パッケージのインストール
-npm install
-# または
-pnpm install
+# Python 仮想環境の確認
+python --version  # 3.11+
 
-# Prisma スキーマの生成
-npx prisma generate
+# 依存パッケージのインストール (uv使用)
+uv sync
 
-# データベースマイグレーション実行
-npx prisma migrate dev --name init
-
-# テストデータをシードする
-npx prisma db seed
+# Alembic データベースマイグレーション実行
+uv run alembic upgrade head
 ```
 
 **マイグレーション確認**:
 
 ```bash
 psql $DATABASE_URL -c "\dt"
-# User, Podcast, Episode, AudioFile, Artwork, TeamMember テーブルが表示されることを確認
+# user_account, podcast, episode, audio_file, artwork, team_member テーブルが表示されることを確認
 ```
 
 ---
@@ -156,8 +163,9 @@ psql $DATABASE_URL -c "\dt"
 
 ```bash
 cd backend
-npm run dev
-# バックエンド起動: http://localhost:3001
+uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+# バックエンド起動: http://localhost:8000
+# Swagger UI: http://localhost:8000/docs
 ```
 
 **ターミナル 2: フロントエンドサーバー**
@@ -182,13 +190,43 @@ http://localhost:3000
 
 ### テスト用アカウントでログイン
 
-`npx prisma db seed` で以下のテストユーザーが作成されます：
+**テストユーザーを作成する** (管理者アカウント):
 
-**テストユーザー**
-| メール | パスワード | 用途 |
-|--------|----------|------|
-| creator@example.com | TestPassword123! | 番組所有者 |
-| editor@example.com | TestPassword123! | チームメンバー（編集者） |
+```bash
+cd backend
+
+# ユーザー作成スクリプト実行
+uv run python -c "
+from app.models.base import User
+from app.core.database import AsyncSessionLocal
+import asyncio
+
+async def create_test_user():
+    async with AsyncSessionLocal() as session:
+        user = User(
+            email='creator@example.com',
+            username='creator',
+            hashed_password='$2b$12$...',  # bcryptハッシュ
+            role='admin'
+        )
+        session.add(user)
+        await session.commit()
+
+asyncio.run(create_test_user())
+"
+```
+
+または、以下のエンドポイントで登録:
+
+```bash
+curl -X POST http://localhost:8000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "creator@example.com",
+    "password": "TestPassword123!",
+    "username": "creator"
+  }'
+```
 
 ### ユースケース 1: 新しい番組を作成
 
@@ -196,44 +234,86 @@ http://localhost:3000
    - メール: `creator@example.com`
    - パスワード: `TestPassword123!`
 
-2. **ダッシュボード → 番組管理 → 新規作成**
+2. **API で番組作成**
 
-   ```
-   タイトル: "My Test Podcast"
-   説明: "A test podcast for development"
-   著者: "John Doe"
-   カテゴリ: Technology
-   言語: English (en)
-   不適切な表現: いいえ
+   ```bash
+   # JWT トークンを取得
+   TOKEN=$(curl -X POST http://localhost:8000/api/auth/login \
+     -H "Content-Type: application/json" \
+     -d '{
+       "email": "creator@example.com",
+       "password": "TestPassword123!"
+     }' | jq -r '.access_token')
+
+   # 番組を作成
+   curl -X POST http://localhost:8000/api/shows \
+     -H "Authorization: Bearer $TOKEN" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "title": "My Test Podcast",
+       "description": "A test podcast for development",
+       "owner_id": "user-uuid",
+       "cover_art_url": ""
+     }'
    ```
 
 3. **保存**
    - フィード URL が自動生成される
-   - RSS フィードは `http://localhost:3001/feeds/{podcastId}/rss.xml` でアクセス可能
+   - RSS フィードは `http://localhost:8000/feeds/{podcastId}/rss.xml` でアクセス可能
 
 ### ユースケース 2: エピソードを追加
 
-1. **番組詳細 → エピソード管理 → 新規作成**
+1. **API でエピソード作成**
 
-   ```
-   タイトル: "Episode 1: Introduction"
-   説明: "Welcome to the show!"
-   シーズン: 1
-   エピソード番号: 1
-   公開予定日時: 2026-01-27 10:00 (現在時刻)
+   ```bash
+   curl -X POST http://localhost:8000/api/shows/{show_id}/episodes \
+     -H "Authorization: Bearer $TOKEN" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "title": "Episode 1: Introduction",
+       "description": "Welcome to the show!",
+       "podcast_id": "podcast-uuid",
+       "status": "draft"
+     }'
    ```
 
 2. **保存**
+   - エピソードが下書き状態で作成される
 
 ### ユースケース 3: 音声ファイルをアップロード
 
-1. **エピソード詳細 → 音声ファイル → アップロード**
+1. **署名付き URL を取得**
 
-2. **署名付き URL を取得**
-   - バックエンド API が自動で GCS 署名付きURL を生成
+   ```bash
+   curl -X POST http://localhost:8000/api/audio/signed-url \
+     -H "Authorization: Bearer $TOKEN" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "filename": "episode1.mp3",
+       "content_type": "audio/mpeg"
+     }'
+   ```
 
-3. **MP3 ファイルを選択して直接 GCS にアップロード**
-   - ブラウザ → GCS へ直接アップロード（セキュア）
+2. **署名付き URL を使用して GCS に直接アップロード**
+
+   ```bash
+   curl -X PUT "$SIGNED_URL" \
+     -H "Content-Type: audio/mpeg" \
+     --data-binary @episode1.mp3
+   ```
+
+3. **エピソードにメタデータを登録**
+
+   ```bash
+   curl -X POST http://localhost:8000/api/shows/{show_id}/episodes/{episode_id}/audio \
+     -H "Authorization: Bearer $TOKEN" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "filename": "episode1.mp3",
+       "duration_seconds": 3600,
+       "file_size_bytes": 50000000
+     }'
+   ```
 
 4. **完了確認**
    - RSS フィードに Enclosure タグが追加される
@@ -243,7 +323,7 @@ http://localhost:3000
 **固定フィード URL** を確認：
 
 ```bash
-curl http://localhost:3001/feeds/{podcastId}/rss.xml
+curl http://localhost:8000/feeds/{podcastId}/rss.xml
 ```
 
 **出力**: 有効な XML フィード
@@ -261,64 +341,31 @@ curl http://localhost:3001/feeds/{podcastId}/rss.xml
 
 ---
 
-## テストデータシード
-
-**backend/prisma/seed.ts** で以下のテストデータを自動生成：
-
-### 作成されるデータ
-
-```
-User: creator@example.com (所有者)
-  └─ Podcast: "Test Show #1"
-      ├─ Episode 1: "Introduction"
-      │   └─ AudioFile: sample-audio.mp3 (mock)
-      ├─ Episode 2: "Deep Dive"
-      └─ Artwork: test-cover.jpg (3000x3000px mock)
-
-  └─ Podcast: "Test Show #2"
-      └─ Episode 1: "Pilot"
-
-User: editor@example.com
-  └─ TeamMember (EDITOR) for "Test Show #1"
-```
-
-**シード実行**
-
-```bash
-cd backend
-npx prisma db seed
-```
-
-**削除してリセット**
-
-```bash
-cd backend
-npx prisma migrate reset
-# 確認: y
-```
-
----
-
 ## 開発ワークフロー
 
 ### コードの追加・修正
 
 ```bash
+# バックエンド例
+cd backend
+# app/services/podcast.py を編集
+# uv run uvicorn app.main:app --reload で自動リロード
+
 # フロントエンド例
 cd frontend
 # src/components/podcast/ShowForm.tsx を編集
 # npm run dev で自動リロード
-
-# バックエンド例
-cd backend
-# src/services/podcast.service.ts を編集
-# npm run dev で自動リスタート
 ```
 
 ### テストの実行
 
 ```bash
-# ユニットテスト
+# バックエンドユニットテスト
+cd backend
+uv run pytest
+
+# フロントエンドユニットテスト
+cd frontend
 npm run test
 
 # E2E テスト（ブラウザテスト）
@@ -331,6 +378,13 @@ npm run test:coverage
 ### 型チェック・リント
 
 ```bash
+# バックエンド
+cd backend
+uv run ruff check app/
+uv run black --check app/
+
+# フロントエンド
+cd frontend
 npm run type-check
 npm run lint
 npm run lint --fix  # 自動修正
@@ -341,13 +395,13 @@ npm run lint --fix  # 自動修正
 ```bash
 # 新しいマイグレーション作成
 cd backend
-npx prisma migrate dev --name add_new_field
+uv run alembic revision --autogenerate -m "add_new_field"
 
 # マイグレーション確認
-npx prisma migrate status
+uv run alembic current
 
 # 本番環境に適用（デプロイ時）
-npx prisma migrate deploy
+uv run alembic upgrade head
 ```
 
 ---
@@ -359,19 +413,19 @@ npx prisma migrate deploy
 **ユーザー登録**
 
 ```bash
-curl -X POST http://localhost:3001/api/v1/auth/register \
+curl -X POST http://localhost:8000/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "email": "test@example.com",
     "password": "TestPassword123!",
-    "name": "Test User"
+    "username": "testuser"
   }'
 ```
 
 **ログイン**
 
 ```bash
-curl -X POST http://localhost:3001/api/v1/auth/login \
+curl -X POST http://localhost:8000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "creator@example.com",
@@ -383,14 +437,23 @@ curl -X POST http://localhost:3001/api/v1/auth/login \
 **番組一覧取得**
 
 ```bash
-curl -X GET http://localhost:3001/api/v1/shows \
+curl -X GET http://localhost:8000/api/shows \
   -H "Authorization: Bearer {トークン}"
 ```
 
-### Postman / Insomnia での確認
+**ヘルスチェック**
 
-- **OpenAPI スキーマ**: `specs/001-podcast-cms-core/contracts/api.openapi.yaml`
-- Postman や Insomnia にインポート可能
+```bash
+curl http://localhost:8000/health
+```
+
+### Swagger UI での確認
+
+```
+http://localhost:8000/docs
+```
+
+FastAPI の自動生成 API ドキュメント（Swagger UI）が表示されます。
 
 ---
 
@@ -410,18 +473,18 @@ docker-compose down -v
 docker-compose up -d postgres
 ```
 
-### Prisma マイグレーション失敗
+### Alembic マイグレーション失敗
 
 ```bash
-# スキーマ再生成
+# マイグレーション履歴確認
 cd backend
-npx prisma generate
+uv run alembic history
 
-# マイグレーション履歴リセット（開発のみ）
-npx prisma migrate reset
+# 最新のマイグレーション適用
+uv run alembic upgrade head
 
 # デバッグモード
-DEBUG=* npx prisma migrate dev
+SQLALCHEMY_ECHO=1 uv run alembic upgrade head
 ```
 
 ### フロントエンド ビルドエラー
@@ -439,50 +502,68 @@ npm run type-check
 npm run lint
 ```
 
+### FastAPI サーバーエラー
+
+```bash
+# ポート 8000 の競合確認
+lsof -i :8000
+
+# 別ポートで起動
+uv run uvicorn app.main:app --reload --port 8001
+```
+
 ### API 401 エラー（認証失敗）
 
 - JWT トークンの有効期限確認
-- `NEXTAUTH_SECRET` が設定されているか確認
+- `SECRET_KEY` 環境変数が設定されているか確認
 - ブラウザの Cookie をクリア
 
 ```bash
 # 開発環境のみ: トークン有効期限を長く設定
-NEXTAUTH_SECRET=dev-secret-key
+ACCESS_TOKEN_EXPIRE_MINUTES=1440  # 24時間
 ```
 
 ### GCS / R2 アップロード失敗
 
 ```bash
 # 認証情報確認
-echo $GCS_CREDENTIAL_PATH
+echo $GCS_PROJECT_ID
+echo $GCS_BUCKET_NAME
 echo $R2_ACCESS_KEY_ID
 
 # ローカル署名付きURL生成テスト
 cd backend
-npm run test:gcs-signing
+uv run python -c "from app.lib.gcs import GCSClient; print(GCSClient.get_instance())"
 ```
 
 ---
 
 ## 次のステップ
 
-1. **UI/UX デザイン**: Storybook で Shadcn UI コンポーネント確認
+1. **コンポーネント開発**: フロントエンド Shadcn UI コンポーネント実装
 
    ```bash
    cd frontend
-   npm run storybook
+   npm run dev
    ```
 
-2. **E2E テスト作成**: Playwright で ユーザーフロー検証
+2. **E2E テスト作成**: Playwright でユーザーフロー検証
 
    ```bash
    cd frontend
    npm run test:e2e
    ```
 
-3. **デプロイ準備**: GitHub Actions CI/CD パイプライン設定
+3. **バックエンドテスト**: pytest でユニットテスト実装
 
-4. **本番環境**: GCP / Cloudflare 本番アカウント設定
+   ```bash
+   cd backend
+   uv run pytest tests/
+   ```
+
+4. **デプロイ準備**: GitHub Actions CI/CD パイプライン設定
+
+5. **本番環境**: GCP / Cloudflare 本番アカウント設定
 
 ---
 
