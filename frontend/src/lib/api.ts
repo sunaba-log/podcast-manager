@@ -172,6 +172,7 @@ export const API_ENDPOINTS = {
     REGISTER: '/api/auth/register',
     ME: '/api/auth/me',
     LOGOUT: '/api/auth/logout',
+    REFRESH: '/api/auth/refresh',
   },
   // Podcasts
   PODCASTS: {

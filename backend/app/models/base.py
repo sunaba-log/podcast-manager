@@ -31,6 +31,12 @@ class User(Base):
     podcasts = relationship("Podcast", back_populates="owner")
     team_memberships = relationship("TeamMember", back_populates="user")
 
+    def verify_password(self, password: str) -> bool:
+        """Verify password against hash."""
+        import bcrypt
+
+        return bcrypt.checkpw(password.encode(), self.hashed_password.encode())
+
 
 class Podcast(Base):
     """Podcast entity"""
