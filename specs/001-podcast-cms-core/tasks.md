@@ -108,15 +108,15 @@
 
 ### 実装 - ユーザーストーリー2
 
-- [ ] T044 [P] [US2] Artwork SQLAlchemy モデルとリレーションを `/backend/app/models/artwork.py` に追加
-- [ ] T045 [P] [US2] 画像検証ユーティリティを `/backend/app/lib/image_validator.py` に実装（サイズ・形式チェック）
-- [ ] T046 [US2] 画像アップロード受け付けエンドポイント `POST /api/shows/:showId/artwork` を `/backend/app/api/routes/artwork.py` に実装（依存：T045）
-- [ ] T047 [US2] 画像取得エンドポイント `GET /api/shows/:showId/artwork` を `/backend/app/api/routes/artwork.py` に実装
-- [ ] T048 [US2] 画像削除エンドポイント `DELETE /api/shows/:showId/artwork` を `/backend/app/api/routes/artwork.py` に実装
-- [ ] T049 [P] [US2] アートワークアップロードコンポーネントを `/frontend/src/components/forms/ArtworkUpload.tsx` に実装
-- [ ] T050 [P] [US2] 画像プレビュー＆検証ステータス表示を `/frontend/src/components/podcast/ArtworkPreview.tsx` に実装
-- [ ] T051 [P] [US2] 警告メッセージコンポーネントを `/frontend/src/components/ui/ValidationWarning.tsx` に実装
-- [ ] T052 [US2] フロントエンド - アートワック管理ページを `/frontend/src/app/(dashboard)/shows/[id]/artwork/page.tsx` に実装（依存：T049-T051）
+- [x] T044 [P] [US2] Artwork SQLAlchemy モデルとリレーションを `/backend/app/models/artwork.py` に追加
+- [x] T045 [P] [US2] 画像検証ユーティリティを `/backend/app/lib/image_validator.py` に実装（サイズ・形式チェック）
+- [x] T046 [US2] 画像アップロード受け付けエンドポイント `POST /api/shows/:showId/artwork` を `/backend/app/api/routes/artwork.py` に実装（依存：T045）
+- [x] T047 [US2] 画像取得エンドポイント `GET /api/shows/:showId/artwork` を `/backend/app/api/routes/artwork.py` に実装
+- [x] T048 [US2] 画像削除エンドポイント `DELETE /api/shows/:showId/artwork` を `/backend/app/api/routes/artwork.py` に実装
+- [x] T049 [P] [US2] アートワークアップロードコンポーネントを `/frontend/src/components/forms/ArtworkUpload.tsx` に実装
+- [x] T050 [P] [US2] 画像プレビュー＆検証ステータス表示を `/frontend/src/components/podcast/ArtworkPreview.tsx` に実装
+- [x] T051 [P] [US2] 警告メッセージコンポーネントを `/frontend/src/components/ui/ValidationWarning.tsx` に実装
+- [x] T052 [US2] フロントエンド - アートワック管理ページを `/frontend/src/app/(dashboard)/shows/[id]/artwork/page.tsx` に実装（依存：T049-T051）
 - [ ] T053 [US2] ローカル環境でのテストおよび複数画像での検証
 
 **チェックポイント**: ユーザーストーリー2 完全実装・テスト完了 - MVP コア機能2つ目
@@ -131,17 +131,17 @@
 
 ### 実装 - ユーザーストーリー3
 
-- [ ] T054 [P] [US3] Episode SQLAlchemy モデルを `/backend/app/models/episode.py` に定義（Podcast との関連付け）
-- [ ] T055 [P] [US3] エピソード作成エンドポイント `POST /api/shows/:showId/episodes` を `/backend/app/api/routes/episodes.py` に実装
-- [ ] T056 [P] [US3] エピソード取得エンドポイント `GET /api/shows/:showId/episodes/:episodeId` を `/backend/app/api/routes/episodes.py` に実装
-- [ ] T057 [P] [US3] エピソード一覧エンドポイント `GET /api/shows/:showId/episodes` を `/backend/app/api/routes/episodes.py` に実装
-- [ ] T058 [P] [US3] エピソード更新エンドポイント `PUT /api/shows/:showId/episodes/:episodeId` を `/backend/app/api/routes/episodes.py` に実装
-- [ ] T059 [US3] Episode ビジネスロジックサービスを `/backend/app/services/episode.py` に実装（依存：T055-T058）
-- [ ] T060 [P] [US3] エピソード作成フォームを `/frontend/src/components/forms/CreateEpisodeForm.tsx` に実装
-- [ ] T061 [P] [US3] エピソード編集フォームを `/frontend/src/components/forms/EditEpisodeForm.tsx` に実装
-- [ ] T062 [P] [US3] エピソード一覧コンポーネントを `/frontend/src/components/podcast/EpisodeList.tsx` に実装
-- [ ] T063 [P] [US3] フロントエンド - エピソード管理ページを `/frontend/src/app/(dashboard)/shows/[id]/episodes/page.tsx` に実装
-- [ ] T064 [US3] エピソード入力値検証スキーマを `/backend/app/lib/validators.py` に追加（依存：T013）
+- [x] T054 [P] [US3] Episode SQLAlchemy モデルを `/backend/app/models/episode.py` に定義（Podcast との関連付け）
+- [x] T055 [P] [US3] エピソード作成エンドポイント `POST /api/shows/:showId/episodes` を `/backend/app/api/routes/episodes.py` に実装
+- [x] T056 [P] [US3] エピソード取得エンドポイント `GET /api/shows/:showId/episodes/:episodeId` を `/backend/app/api/routes/episodes.py` に実装
+- [x] T057 [P] [US3] エピソード一覧エンドポイント `GET /api/shows/:showId/episodes` を `/backend/app/api/routes/episodes.py` に実装
+- [x] T058 [P] [US3] エピソード更新エンドポイント `PUT /api/shows/:showId/episodes/:episodeId` を `/backend/app/api/routes/episodes.py` に実装
+- [x] T059 [US3] Episode ビジネスロジックサービスを `/backend/app/services/episode.py` に実装（依存：T055-T058）
+- [x] T060 [P] [US3] エピソード作成フォームを `/frontend/src/components/forms/CreateEpisodeForm.tsx` に実装
+- [x] T061 [P] [US3] エピソード編集フォームを `/frontend/src/components/forms/EditEpisodeForm.tsx` に実装
+- [x] T062 [P] [US3] エピソード一覧コンポーネントを `/frontend/src/components/podcast/EpisodeList.tsx` に実装
+- [x] T063 [P] [US3] フロントエンド - エピソード管理ページを `/frontend/src/app/(dashboard)/shows/[id]/episodes/page.tsx` に実装
+- [x] T064 [US3] エピソード入力値検証スキーマを `/backend/app/lib/validators.py` に追加（依存：T013）
 - [ ] T065 [US3] ローカル環境でのテストおよび複数エピソードでの検証
 
 **チェックポイント**: ユーザーストーリー3 完全実装・テスト完了 - MVP コア機能3つ目
