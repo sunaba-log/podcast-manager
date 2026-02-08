@@ -59,11 +59,11 @@
 
 ⚠️ **CRITICAL**: このフェーズが完了するまで、ファイルアップロード機能（US2・US4）を実装できない
 
-- [ ] T020.5 [P] ストレージバックエンド抽象化インターフェース を `/backend/app/lib/storage.py` に実装（base class、各実装は依存）
-- [ ] T020.6 [P] Google Cloud Storage (GCS) バックエンド実装を `/backend/app/lib/storage_gcs.py` に実装（署名付きURL、削除）
-- [ ] T020.7 [P] Cloudflare R2 バックエンド実装を `/backend/app/lib/storage_r2.py` に実装
-- [ ] T020.8 [P] ストレージバックエンド設定を `/backend/app/core/config.py` に追加（環境変数から読み込み）
-- [ ] T020.9 ストレージバックエンド依存解決コンテナを `/backend/app/core/dependencies.py` に実装
+- [x] T020.5 [P] ストレージバックエンド抽象化インターフェース を `/backend/app/lib/storage.py` に実装（base class、各実装は依存）
+- [x] T020.6 [P] Google Cloud Storage (GCS) バックエンド実装を `/backend/app/lib/storage_gcs.py` に実装（署名付きURL、削除）
+- [x] T020.7 [P] Cloudflare R2 バックエンド実装を `/backend/app/lib/storage_r2.py` に実装
+- [x] T020.8 [P] ストレージバックエンド設定を `/backend/app/core/config.py` に追加（環境変数から読み込み）
+- [x] T020.9 ストレージバックエンド依存解決コンテナを `/backend/app/core/dependencies.py` に実装
 
 **チェックポイント**: ストレージ抽象化完全実装・複数バックエンド対応準備完了
 

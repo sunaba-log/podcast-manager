@@ -38,6 +38,14 @@ class Settings(BaseSettings):
     R2_BUCKET_NAME: str = ""
     R2_PUBLIC_URL: str = ""
 
+    # Storage Backend Configuration
+    # Valid values: "gcs", "r2"
+    STORAGE_BACKEND: str = "r2"
+    # Timeout in seconds for storage operations
+    STORAGE_TIMEOUT_SECONDS: int = 30
+    # Maximum file size in bytes (default: 5GB)
+    STORAGE_MAX_FILE_SIZE: int = 5 * 1024 * 1024 * 1024
+
     # Email
     SMTP_SERVER: str = "smtp.gmail.com"
     SMTP_PORT: int = 587
