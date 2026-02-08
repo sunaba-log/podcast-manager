@@ -118,26 +118,26 @@
 
 ## Phase 4: ユーザーストーリー2 - 番組・エピソードアートワーク管理（優先度: P1）
 
-**ゴール**: 配信者が番組レベルおよびエピソードレベルでカバーアート（画像）をアップロードでき、プラットフォーム規格（Apple/Spotify: 3000x3000px以上）への適合性を検証できる。ストレージバックエンド（GCS、Cloudflare R2など）は設定によって切り替え可能。
+**ゴール**: 配信者が番組レベルおよびエピソードレベルでカバーアート（画像）をアップロードでき、プラットフォーム規格（Apple/Spotify: 3000x3000px以上）への適合性を検証できる。ストレージバックエンド（GCS、Cloudflare R2など）は Phase 2.1 で実装済みで、設定によって切り替え可能。
 
 **独立テスト**: チャンネルとエピソードの両レベルで画像をアップロードして、警告メッセージと検証結果が正確に表示される
 
 ### 実装 - ユーザーストーリー2
 
-- [ ] T044 [P] [US2] Artwork SQLAlchemy モデルを `/backend/app/models/artwork.py` に更新（Podcast と Episode の両方に関連付け対応）
-- [ ] T045 [P] [US2] 画像検証ユーティリティを `/backend/app/lib/image_validator.py` に実装（サイズ・形式チェック）
-- [ ] T046 [US2] 番組レベル画像アップロードエンドポイント `POST /api/shows/:showId/artwork` を `/backend/app/api/routes/artwork.py` に実装（依存：T045, T020.5）
-- [ ] T047 [US2] 番組レベル画像取得エンドポイント `GET /api/shows/:showId/artwork` を `/backend/app/api/routes/artwork.py` に実装
-- [ ] T048 [US2] 番組レベル画像削除エンドポイント `DELETE /api/shows/:showId/artwork` を `/backend/app/api/routes/artwork.py` に実装
-- [ ] T049 [P] [US2] エピソードレベル画像アップロードエンドポイント `POST /api/shows/:showId/episodes/:episodeId/artwork` を `/backend/app/api/routes/artwork.py` に実装
-- [ ] T050 [P] [US2] エピソードレベル画像取得エンドポイント `GET /api/shows/:showId/episodes/:episodeId/artwork` を `/backend/app/api/routes/artwork.py` に実装
-- [ ] T051 [P] [US2] エピソードレベル画像削除エンドポイント `DELETE /api/shows/:showId/episodes/:episodeId/artwork` を `/backend/app/api/routes/artwork.py` に実装
-- [ ] T052 [P] [US2] アートワークアップロードコンポーネントを `/frontend/src/components/forms/ArtworkUpload.tsx` に実装（再利用可能）
-- [ ] T053 [P] [US2] 画像プレビュー＆検証ステータス表示を `/frontend/src/components/podcast/ArtworkPreview.tsx` に実装
-- [ ] T054 [P] [US2] 警告メッセージコンポーネントを `/frontend/src/components/ui/ValidationWarning.tsx` に実装
-- [ ] T055 [US2] フロントエンド - 番組レベルアートワーク管理ページを `/frontend/src/app/(dashboard)/shows/[id]/artwork/page.tsx` に実装（依存：T052-T054）
-- [ ] T056 [US2] フロントエンド - エピソード編集フォームにアートワーク管理を統合（依存：T052-T054）
-- [ ] T057 [US2] ローカル環境でのテストおよび複数画像での検証
+- [x] T044 [P] [US2] Artwork SQLAlchemy モデルを `/backend/app/models/artwork.py` に作成（Podcast と Episode の両方に関連付け対応、storage_key フィールド含む）
+- [x] T045 [P] [US2] 画像検証ユーティリティを `/backend/app/lib/image_validator.py` に実装（サイズ・形式チェック、MIME型検証）
+- [x] T046 [US2] 番組レベル画像アップロードエンドポイント `POST /api/shows/:showId/artwork` を `/backend/app/api/routes/artwork.py` に実装（依存：T044, T045、ストレージ依存はT020.9経由）
+- [x] T047 [US2] 番組レベル画像取得エンドポイント `GET /api/shows/:showId/artwork` を `/backend/app/api/routes/artwork.py` に実装
+- [x] T048 [US2] 番組レベル画像削除エンドポイント `DELETE /api/shows/:showId/artwork` を `/backend/app/api/routes/artwork.py` に実装
+- [x] T049 [P] [US2] エピソードレベル画像アップロードエンドポイント `POST /api/shows/:showId/episodes/:episodeId/artwork` を `/backend/app/api/routes/artwork.py` に実装
+- [x] T050 [P] [US2] エピソードレベル画像取得エンドポイント `GET /api/shows/:showId/episodes/:episodeId/artwork` を `/backend/app/api/routes/artwork.py` に実装
+- [x] T051 [P] [US2] エピソードレベル画像削除エンドポイント `DELETE /api/shows/:showId/episodes/:episodeId/artwork` を `/backend/app/api/routes/artwork.py` に実装
+- [x] T052 [P] [US2] アートワークアップロードコンポーネント（ドラッグ&ドロップ対応）を `/frontend/src/components/forms/ArtworkUpload.tsx` に実装（再利用可能、署名付きURL利用）
+- [x] T053 [P] [US2] 画像プレビュー＆検証ステータス表示を `/frontend/src/components/podcast/ArtworkPreview.tsx` に実装
+- [x] T054 [P] [US2] 警告メッセージコンポーネント（サイズ不足警告）を `/frontend/src/components/ui/ValidationWarning.tsx` に実装
+- [x] T055 [US2] フロントエンド - 番組レベルアートワーク管理ページを `/frontend/src/app/(dashboard)/shows/[id]/artwork/page.tsx` に実装（依存：T052-T054）
+- [x] T056 [US2] フロントエンド - エピソード編集フォームにアートワーク管理を統合（依存：T052-T054）
+- [ ] T057 [US2] ローカル環境でのテストおよび複数画像での検証（GCS/R2両バックエンド確認）
 
 **チェックポイント**: ユーザーストーリー2 完全実装・テスト完了 - MVP コア機能2つ目
 
@@ -170,23 +170,23 @@
 
 ## Phase 6: ユーザーストーリー4 - 音声ファイルのアップロードと紐付け（優先度: P1）
 
-**ゴール**: 配信者が MP3/AAC 形式の音声ファイルをストレージ（GCS等）にアップロードし、エピソードに紐付け、Enclosure URL として管理できる
+**ゴール**: 配信者が MP3/AAC 形式の音声ファイルをストレージ（GCS等）にアップロードし、エピソードに紐付け、Enclosure URL として管理できる。ストレージバックエンド（GCS、R2など）は Phase 2.1 で実装済み。
 
 **独立テスト**: 音声ファイルをアップロードしてストレージに保存され、公開 URL が RSS フィードに含まれることを確認
 
 ### 実装 - ユーザーストーリー4
 
-- [ ] T070 [P] [US4] AudioFile SQLAlchemy モデルを `/backend/app/models/audio_file.py` に定義（Episode との関連付け）
-- [ ] T071 [P] [US4] ストレージバックエンド経由の署名付きURL生成エンドポイント `POST /api/audio/signed-url` を `/backend/app/api/routes/audio.py` に実装（依存：T020.5）
+- [ ] T070 [P] [US4] AudioFile SQLAlchemy モデルを `/backend/app/models/audio_file.py` に定義（Episode との関連付け、storage_key フィールド含む）
+- [ ] T071 [P] [US4] ストレージバックエンド経由の署名付きURL生成エンドポイント `POST /api/audio/signed-url` を `/backend/app/api/routes/audio.py` に実装（依存：T020.9）
 - [ ] T072 [P] [US4] 音声ファイルメタデータ登録エンドポイント `POST /api/shows/:showId/episodes/:episodeId/audio` を `/backend/app/api/routes/audio.py` に実装
 - [ ] T073 [P] [US4] 音声ファイル取得エンドポイント `GET /api/shows/:showId/episodes/:episodeId/audio` を `/backend/app/api/routes/audio.py` に実装
 - [ ] T074 [US4] エピソード削除時の削除イベント送信を `/backend/app/services/episode.py` に実装（依存：T063）
-- [ ] T075 [P] [US4] 音声ファイルアップロードコンポーネントを `/frontend/src/components/forms/AudioUpload.tsx` に実装（署名付きURL利用）
-- [ ] T076 [P] [US4] アップロード進捗インジケータを `/frontend/src/components/ui/UploadProgress.tsx` に実装
+- [ ] T075 [P] [US4] 音声ファイルアップロードコンポーネント（署名付きURL利用）を `/frontend/src/components/forms/AudioUpload.tsx` に実装
+- [ ] T076 [P] [US4] アップロード進捗インジケータ（マルチパート対応）を `/frontend/src/components/ui/UploadProgress.tsx` に実装
 - [ ] T077 [P] [US4] ファイルサイズ警告コンポーネントを `/frontend/src/components/ui/FileSizeWarning.tsx` に実装
 - [ ] T078 [US4] フロントエンド - エピソード編集時に音声アップロード機能を統合（`/frontend/src/components/forms/EditEpisodeForm.tsx` 修正、依存：T065, T075）
-- [ ] T079 [P] [US4] 音声ファイル形式検証を `/backend/app/lib/validators.py` に追加
-- [ ] T080 [US4] ローカル環境でのストレージ認証テスト および ファイルアップロード検証
+- [ ] T079 [P] [US4] 音声ファイル形式検証を `/backend/app/lib/validators.py` に追加（MP3/AAC 対応）
+- [ ] T080 [US4] ローカル環境でのストレージ認証テスト および ファイルアップロード検証（GCS/R2両バックエンド確認）
 
 **チェックポイント**: ユーザーストーリー4 完全実装・テスト完了 - MVP コア機能4つ目
 
@@ -194,20 +194,20 @@
 
 ## Phase 7: ユーザーストーリー5 - RSS フィード自動生成（優先度: P1）
 
-**ゴール**: システムが番組・エピソード・音声ファイルのメタデータから、Podcast Namespace に準拠した有効な XML 形式の RSS フィードを自動生成し、リアルタイム更新される
+**ゴール**: システムが番組・エピソード・音声ファイルのメタデータから、Podcast Namespace に準拠した有効な XML 形式の RSS フィードを自動生成し、リアルタイム更新される。ストレージから署名付きURLを取得して Enclosure URL に含める。
 
 **独立テスト**: RSS フィード生成エンドポイントを呼び出し、有効な XML が返され、必須タグがすべて含まれることを確認
 
 ### 実装 - ユーザーストーリー5
 
-- [ ] T077 [P] [US5] RSS 生成ロジックを `/backend/app/services/feed.py` に実装（Podcast Namespace 対応）
-- [ ] T078 [P] [US5] Enclosure URL に R2 公開 URL を含めるロジックを追加（`feed.py` 内）
+- [ ] T077 [P] [US5] RSS 生成ロジックを `/backend/app/services/feed.py` に実装（Podcast Namespace 対応、エラーハンドリング）
+- [ ] T078 [P] [US5] Enclosure URL に ストレージバックエンド（T020.9）から取得した署名付き URL を含めるロジックを追加（`feed.py` 内）
 - [ ] T079 [P] [US5] RSS フィード取得エンドポイント `GET /feeds/shows/:showId/rss.xml` を `/backend/app/api/routes/feeds.py` に実装
-- [ ] T080 [P] [US5] XML 検証ユーティリティを `/backend/app/lib/xml_validator.py` に実装
+- [ ] T080 [P] [US5] XML 検証ユーティリティを `/backend/app/lib/xml_validator.py` に実装（Podcast Namespace バリデーション）
 - [ ] T081 [US5] RSS キャッシング戦略を `/backend/app/lib/cache.py` に実装（パフォーマンス最適化）
 - [ ] T082 [P] [US5] RSS フィード表示・検証ページを `/frontend/src/app/(dashboard)/shows/[id]/feed/page.tsx` に実装
-- [ ] T083 [P] [US5] XML プレビューコンポーネントを `/frontend/src/components/podcast/FeedPreview.tsx` に実装
-- [ ] T084 [US5] 複数エピソード（100+）での RSS 生成パフォーマンステスト
+- [ ] T083 [P] [US5] XML プレビューコンポーネントを `/frontend/src/components/podcast/FeedPreview.tsx` に実装（フォーマット可視化）
+- [ ] T084 [US5] 複数エピソード（100+）での RSS 生成パフォーマンステスト（キャッシュ有効性確認）
 
 **チェックポイント**: ユーザーストーリー5 完全実装・テスト完了 - MVP コア機能5つ目
 

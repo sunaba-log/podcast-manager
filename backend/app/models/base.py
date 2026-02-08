@@ -82,6 +82,7 @@ class Episode(Base):
     # Relationships
     podcast = relationship("Podcast", back_populates="episodes")
     audio_file = relationship("AudioFile", back_populates="episode", uselist=False, cascade="all, delete-orphan")
+    artwork = relationship("Artwork", back_populates="episode", uselist=False, cascade="all, delete-orphan")
 
 
 class AudioFile(Base):
@@ -110,12 +111,17 @@ class Artwork(Base):
     __tablename__ = "artworks"
 
     id = Column(String, primary_key=True)
-    podcast_id = Column(String, ForeignKey("podcasts.id"))
+    podcast_id = Column(String, ForeignKey("podcasts.id"), nullable=True, index=True)
+    episode_id = Column(String, ForeignKey("episodes.id"), nullable=True, index=True)
     filename = Column(String)
     gcs_url = Column(String)
+    storage_key = Column(String, nullable=True)  # Storage backend key for signed URL generation
     width = Column(Integer)
     height = Column(Integer)
     file_size = Column(Integer)
+    mime_type = Column(String, default="image/jpeg")
+    validation_status = Column(String, default="PENDING")  # PENDING, PASSED, PASSED_WITH_WARNING, FAILED
+    validation_warnings = Column(Text, nullable=True)  # JSON array of warning messages
     is_valid = Column(Boolean, default=False)
     validation_errors = Column(Text, nullable=True)
     created_at = Column(DateTime, server_default=func.now())
@@ -123,6 +129,7 @@ class Artwork(Base):
 
     # Relationships
     podcast = relationship("Podcast", back_populates="artwork")
+    episode = relationship("Episode", back_populates="artwork")
 
 
 class TeamMember(Base):
