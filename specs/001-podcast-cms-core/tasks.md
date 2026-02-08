@@ -53,6 +53,22 @@
 
 ---
 
+## Phase 2.1: ストレージバックエンド抽象化（ブロッキング前提条件）
+
+**目的**: ファイルストレージ（画像、音声）の保存先を抽象化し、複数バックエンド（GCS、Cloudflare R2など）に対応可能な設計
+
+⚠️ **CRITICAL**: このフェーズが完了するまで、ファイルアップロード機能（US2・US4）を実装できない
+
+- [ ] T020.5 [P] ストレージバックエンド抽象化インターフェース を `/backend/app/lib/storage.py` に実装（base class、各実装は依存）
+- [ ] T020.6 [P] Google Cloud Storage (GCS) バックエンド実装を `/backend/app/lib/storage_gcs.py` に実装（署名付きURL、削除）
+- [ ] T020.7 [P] Cloudflare R2 バックエンド実装を `/backend/app/lib/storage_r2.py` に実装
+- [ ] T020.8 [P] ストレージバックエンド設定を `/backend/app/core/config.py` に追加（環境変数から読み込み）
+- [ ] T020.9 ストレージバックエンド依存解決コンテナを `/backend/app/core/dependencies.py` に実装
+
+**チェックポイント**: ストレージ抽象化完全実装・複数バックエンド対応準備完了
+
+---
+
 ## Phase 2.5: 認証エンドポイント実装（ブロッキング前提条件）
 
 **目的**: マルチユーザー環境のための認証・アカウント管理エンドポイント実装
@@ -100,24 +116,28 @@
 
 ---
 
-## Phase 4: ユーザーストーリー2 - 番組アートワーク管理（優先度: P1）
+## Phase 4: ユーザーストーリー2 - 番組・エピソードアートワーク管理（優先度: P1）
 
-**ゴール**: 配信者が番組カバーアート（画像）をアップロードし、プラットフォーム規格（Apple/Spotify: 3000x3000px以上）への適合性を検証できる
+**ゴール**: 配信者が番組レベルおよびエピソードレベルでカバーアート（画像）をアップロードでき、プラットフォーム規格（Apple/Spotify: 3000x3000px以上）への適合性を検証できる。ストレージバックエンド（GCS、Cloudflare R2など）は設定によって切り替え可能。
 
-**独立テスト**: 規格外・規格内の画像をアップロードして、警告メッセージと検証結果が正確に表示される
+**独立テスト**: チャンネルとエピソードの両レベルで画像をアップロードして、警告メッセージと検証結果が正確に表示される
 
 ### 実装 - ユーザーストーリー2
 
-- [x] T044 [P] [US2] Artwork SQLAlchemy モデルとリレーションを `/backend/app/models/artwork.py` に追加
-- [x] T045 [P] [US2] 画像検証ユーティリティを `/backend/app/lib/image_validator.py` に実装（サイズ・形式チェック）
-- [x] T046 [US2] 画像アップロード受け付けエンドポイント `POST /api/shows/:showId/artwork` を `/backend/app/api/routes/artwork.py` に実装（依存：T045）
-- [x] T047 [US2] 画像取得エンドポイント `GET /api/shows/:showId/artwork` を `/backend/app/api/routes/artwork.py` に実装
-- [x] T048 [US2] 画像削除エンドポイント `DELETE /api/shows/:showId/artwork` を `/backend/app/api/routes/artwork.py` に実装
-- [x] T049 [P] [US2] アートワークアップロードコンポーネントを `/frontend/src/components/forms/ArtworkUpload.tsx` に実装
-- [x] T050 [P] [US2] 画像プレビュー＆検証ステータス表示を `/frontend/src/components/podcast/ArtworkPreview.tsx` に実装
-- [x] T051 [P] [US2] 警告メッセージコンポーネントを `/frontend/src/components/ui/ValidationWarning.tsx` に実装
-- [x] T052 [US2] フロントエンド - アートワック管理ページを `/frontend/src/app/(dashboard)/shows/[id]/artwork/page.tsx` に実装（依存：T049-T051）
-- [ ] T053 [US2] ローカル環境でのテストおよび複数画像での検証
+- [ ] T044 [P] [US2] Artwork SQLAlchemy モデルを `/backend/app/models/artwork.py` に更新（Podcast と Episode の両方に関連付け対応）
+- [ ] T045 [P] [US2] 画像検証ユーティリティを `/backend/app/lib/image_validator.py` に実装（サイズ・形式チェック）
+- [ ] T046 [US2] 番組レベル画像アップロードエンドポイント `POST /api/shows/:showId/artwork` を `/backend/app/api/routes/artwork.py` に実装（依存：T045, T020.5）
+- [ ] T047 [US2] 番組レベル画像取得エンドポイント `GET /api/shows/:showId/artwork` を `/backend/app/api/routes/artwork.py` に実装
+- [ ] T048 [US2] 番組レベル画像削除エンドポイント `DELETE /api/shows/:showId/artwork` を `/backend/app/api/routes/artwork.py` に実装
+- [ ] T049 [P] [US2] エピソードレベル画像アップロードエンドポイント `POST /api/shows/:showId/episodes/:episodeId/artwork` を `/backend/app/api/routes/artwork.py` に実装
+- [ ] T050 [P] [US2] エピソードレベル画像取得エンドポイント `GET /api/shows/:showId/episodes/:episodeId/artwork` を `/backend/app/api/routes/artwork.py` に実装
+- [ ] T051 [P] [US2] エピソードレベル画像削除エンドポイント `DELETE /api/shows/:showId/episodes/:episodeId/artwork` を `/backend/app/api/routes/artwork.py` に実装
+- [ ] T052 [P] [US2] アートワークアップロードコンポーネントを `/frontend/src/components/forms/ArtworkUpload.tsx` に実装（再利用可能）
+- [ ] T053 [P] [US2] 画像プレビュー＆検証ステータス表示を `/frontend/src/components/podcast/ArtworkPreview.tsx` に実装
+- [ ] T054 [P] [US2] 警告メッセージコンポーネントを `/frontend/src/components/ui/ValidationWarning.tsx` に実装
+- [ ] T055 [US2] フロントエンド - 番組レベルアートワーク管理ページを `/frontend/src/app/(dashboard)/shows/[id]/artwork/page.tsx` に実装（依存：T052-T054）
+- [ ] T056 [US2] フロントエンド - エピソード編集フォームにアートワーク管理を統合（依存：T052-T054）
+- [ ] T057 [US2] ローカル環境でのテストおよび複数画像での検証
 
 **チェックポイント**: ユーザーストーリー2 完全実装・テスト完了 - MVP コア機能2つ目
 
@@ -131,18 +151,18 @@
 
 ### 実装 - ユーザーストーリー3
 
-- [x] T054 [P] [US3] Episode SQLAlchemy モデルを `/backend/app/models/episode.py` に定義（Podcast との関連付け）
-- [x] T055 [P] [US3] エピソード作成エンドポイント `POST /api/shows/:showId/episodes` を `/backend/app/api/routes/episodes.py` に実装
-- [x] T056 [P] [US3] エピソード取得エンドポイント `GET /api/shows/:showId/episodes/:episodeId` を `/backend/app/api/routes/episodes.py` に実装
-- [x] T057 [P] [US3] エピソード一覧エンドポイント `GET /api/shows/:showId/episodes` を `/backend/app/api/routes/episodes.py` に実装
-- [x] T058 [P] [US3] エピソード更新エンドポイント `PUT /api/shows/:showId/episodes/:episodeId` を `/backend/app/api/routes/episodes.py` に実装
-- [x] T059 [US3] Episode ビジネスロジックサービスを `/backend/app/services/episode.py` に実装（依存：T055-T058）
-- [x] T060 [P] [US3] エピソード作成フォームを `/frontend/src/components/forms/CreateEpisodeForm.tsx` に実装
-- [x] T061 [P] [US3] エピソード編集フォームを `/frontend/src/components/forms/EditEpisodeForm.tsx` に実装
-- [x] T062 [P] [US3] エピソード一覧コンポーネントを `/frontend/src/components/podcast/EpisodeList.tsx` に実装
-- [x] T063 [P] [US3] フロントエンド - エピソード管理ページを `/frontend/src/app/(dashboard)/shows/[id]/episodes/page.tsx` に実装
-- [x] T064 [US3] エピソード入力値検証スキーマを `/backend/app/lib/validators.py` に追加（依存：T013）
-- [ ] T065 [US3] ローカル環境でのテストおよび複数エピソードでの検証
+- [x] T058 [P] [US3] Episode SQLAlchemy モデルを `/backend/app/models/episode.py` に定義（Podcast との関連付け、Artwork 対応）
+- [x] T059 [P] [US3] エピソード作成エンドポイント `POST /api/shows/:showId/episodes` を `/backend/app/api/routes/episodes.py` に実装
+- [x] T060 [P] [US3] エピソード取得エンドポイント `GET /api/shows/:showId/episodes/:episodeId` を `/backend/app/api/routes/episodes.py` に実装
+- [x] T061 [P] [US3] エピソード一覧エンドポイント `GET /api/shows/:showId/episodes` を `/backend/app/api/routes/episodes.py` に実装
+- [x] T062 [P] [US3] エピソード更新エンドポイント `PUT /api/shows/:showId/episodes/:episodeId` を `/backend/app/api/routes/episodes.py` に実装
+- [x] T063 [US3] Episode ビジネスロジックサービスを `/backend/app/services/episode.py` に実装（依存：T059-T062）
+- [x] T064 [P] [US3] エピソード作成フォームを `/frontend/src/components/forms/CreateEpisodeForm.tsx` に実装
+- [x] T065 [P] [US3] エピソード編集フォームを `/frontend/src/components/forms/EditEpisodeForm.tsx` に実装
+- [x] T066 [P] [US3] エピソード一覧コンポーネントを `/frontend/src/components/podcast/EpisodeList.tsx` に実装
+- [x] T067 [P] [US3] フロントエンド - エピソード管理ページを `/frontend/src/app/(dashboard)/shows/[id]/episodes/page.tsx` に実装
+- [x] T068 [US3] エピソード入力値検証スキーマを `/backend/app/lib/validators.py` に追加（依存：T013）
+- [ ] T069 [US3] ローカル環境でのテストおよび複数エピソードでの検証
 
 **チェックポイント**: ユーザーストーリー3 完全実装・テスト完了 - MVP コア機能3つ目
 
@@ -150,23 +170,23 @@
 
 ## Phase 6: ユーザーストーリー4 - 音声ファイルのアップロードと紐付け（優先度: P1）
 
-**ゴール**: 配信者が MP3/AAC 形式の音声ファイルを GCS にアップロードし、エピソードに紐付け、Enclosure URL として管理できる
+**ゴール**: 配信者が MP3/AAC 形式の音声ファイルをストレージ（GCS等）にアップロードし、エピソードに紐付け、Enclosure URL として管理できる
 
-**独立テスト**: 音声ファイルをアップロードして GCS に保存され、R2 の公開 URL が RSS フィードに含まれることを確認
+**独立テスト**: 音声ファイルをアップロードしてストレージに保存され、公開 URL が RSS フィードに含まれることを確認
 
 ### 実装 - ユーザーストーリー4
 
-- [ ] T066 [P] [US4] AudioFile SQLAlchemy モデルを `/backend/app/models/audio_file.py` に定義（Episode との関連付け）
-- [ ] T067 [P] [US4] GCS 署名付きURL生成エンドポイント `POST /api/audio/signed-url` を `/backend/app/api/routes/audio.py` に実装
-- [ ] T068 [P] [US4] 音声ファイルメタデータ登録エンドポイント `POST /api/shows/:showId/episodes/:episodeId/audio` を `/backend/app/api/routes/audio.py` に実装
-- [ ] T069 [P] [US4] 音声ファイル取得エンドポイント `GET /api/shows/:showId/episodes/:episodeId/audio` を `/backend/app/api/routes/audio.py` に実装
-- [ ] T070 [US4] エピソード削除時の削除イベント送信を `/backend/app/services/episode.py` に実装（依存：T059）
-- [ ] T071 [P] [US4] 音声ファイルアップロードコンポーネントを `/frontend/src/components/forms/AudioUpload.tsx` に実装（署名付きURL利用）
-- [ ] T072 [P] [US4] アップロード進捗インジケータを `/frontend/src/components/ui/UploadProgress.tsx` に実装
-- [ ] T073 [P] [US4] ファイルサイズ警告コンポーネントを `/frontend/src/components/ui/FileSizeWarning.tsx` に実装
-- [ ] T074 [US4] フロントエンド - エピソード編集時に音声アップロード機能を統合（`/frontend/src/components/forms/EditEpisodeForm.tsx` 修正、依存：T061, T071）
-- [ ] T075 [P] [US4] 音声ファイル形式検証を `/backend/app/lib/validators.py` に追加
-- [ ] T076 [US4] ローカル環境での GCS 認証テスト および ファイルアップロード検証
+- [ ] T070 [P] [US4] AudioFile SQLAlchemy モデルを `/backend/app/models/audio_file.py` に定義（Episode との関連付け）
+- [ ] T071 [P] [US4] ストレージバックエンド経由の署名付きURL生成エンドポイント `POST /api/audio/signed-url` を `/backend/app/api/routes/audio.py` に実装（依存：T020.5）
+- [ ] T072 [P] [US4] 音声ファイルメタデータ登録エンドポイント `POST /api/shows/:showId/episodes/:episodeId/audio` を `/backend/app/api/routes/audio.py` に実装
+- [ ] T073 [P] [US4] 音声ファイル取得エンドポイント `GET /api/shows/:showId/episodes/:episodeId/audio` を `/backend/app/api/routes/audio.py` に実装
+- [ ] T074 [US4] エピソード削除時の削除イベント送信を `/backend/app/services/episode.py` に実装（依存：T063）
+- [ ] T075 [P] [US4] 音声ファイルアップロードコンポーネントを `/frontend/src/components/forms/AudioUpload.tsx` に実装（署名付きURL利用）
+- [ ] T076 [P] [US4] アップロード進捗インジケータを `/frontend/src/components/ui/UploadProgress.tsx` に実装
+- [ ] T077 [P] [US4] ファイルサイズ警告コンポーネントを `/frontend/src/components/ui/FileSizeWarning.tsx` に実装
+- [ ] T078 [US4] フロントエンド - エピソード編集時に音声アップロード機能を統合（`/frontend/src/components/forms/EditEpisodeForm.tsx` 修正、依存：T065, T075）
+- [ ] T079 [P] [US4] 音声ファイル形式検証を `/backend/app/lib/validators.py` に追加
+- [ ] T080 [US4] ローカル環境でのストレージ認証テスト および ファイルアップロード検証
 
 **チェックポイント**: ユーザーストーリー4 完全実装・テスト完了 - MVP コア機能4つ目
 
